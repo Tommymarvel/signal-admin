@@ -16,10 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`bg-white-200 font-man-rope antialiased flex items-start`}
+        className={`bg-white-200 font-man-rope antialiased flex items-start h-screen `}
       >
         <Sidebar />
-        <div className="w-full">
+        <div className="w-full h-full overflow-y-auto">
           <Navbar/>
           {children}
         </div>

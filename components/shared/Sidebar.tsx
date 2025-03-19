@@ -39,7 +39,7 @@ const Sidebar = () => {
   };
   return (
     <div
-    className="flex h-screen bg-white-200"
+    className="flex h-screen bg-white "
     style={{ width: sidebarWidth }}
     >
       <div className="" style={{ width: sidebarWidth }}>
