@@ -22,8 +22,6 @@ const highestTrade = data.reduce((max, d) => (d.volume > max.volume ? d : max), 
 const averageTrade = (data.reduce((sum, d) => sum + d.volume, 0) / data.length).toFixed(2);
 
 const TradeVolumeChart = () => {
-  const [year, setYear] = useState("Last year");
-
   return (
     <div className="p-6 bg-white rounded-lg mt-7">
       <div className="flex justify-between items-center mb-4">
@@ -54,19 +52,19 @@ const TradeVolumeChart = () => {
               style: { fontSize: 12, textAnchor: 'middle' }
             }}  tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
           <Tooltip />
-          <Bar dataKey="volume" fill="#3b82f6" barSize={50} />
+          <Bar dataKey="volume" fill="#454ADE" barSize={50} />
         </BarChart>
       </ResponsiveContainer>
       <div className="grid grid-cols-2 gap-4 mt-4">
-        <div>
-          <p className="p-4 text-sm">
-            In the month of <span className="font-bold text-blue-600">{highestTrade.month}</span>, users had the highest trade volume
+        <div className="py-3 px-4 bg-white-200">
+          <p className=" text-sm">
+            In the month of <span className="font-bold text-pr2">{highestTrade.month}</span>, users had the highest trade volume
             amounting to <span className="font-bold">${highestTrade.volume.toLocaleString()}.</span>
           </p>
         </div>
-        <div>
-          <p className="p-4 text-sm">
-            The average trade amount was <span className="font-bold text-blue-600">${parseFloat(averageTrade).toLocaleString()}.</span>
+        <div className="py-3 px-4 bg-white-200">
+          <p className=" text-sm">
+            The average trade amount was <span className="font-bold text-pr2">${parseFloat(averageTrade).toLocaleString()}.</span>
           </p>
         </div>
       </div>
