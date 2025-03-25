@@ -1,6 +1,7 @@
 "use client"
 import Image from "next/image";
 import React, { useState } from "react";
+import UserDropDown from "./UserDropDown";
 
 const users = [
   { id: 1, name: "Amara Onyebuchi", email: "amaonyebuchi@ecs.com", phone: "08147511481", dateJoined: "12/05/2023", kycStatus: "Verified", status: "Active" },
@@ -89,7 +90,7 @@ const UserTable = () => {
               <td className="p-3">{user.dateJoined}</td>
               <td className="p-3 text-blue-500">{user.kycStatus}</td>
               <td className={`p-3 ${user.status === "Active" ? "text-green-500" : "text-red-500"}`}>{user.status}</td>
-              <td className="p-3 text-blue-500"><Image src={`/umanage/more.svg`} alt="" width={24} height={24}/></td>
+              <td className="p-3 text-blue-500"><UserDropDown userId="12345"/></td>
             </tr>
           ))}
         </tbody>

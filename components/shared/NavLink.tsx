@@ -1,3 +1,4 @@
+'use client'
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { ReactElement } from "react"
@@ -17,3 +18,15 @@ const NavLink = ({to, text, children}: {to : string, text : string, children : R
 }
 
 export default NavLink
+
+export const PrimaryLink = ({to, text, className}:{to : string, text : string, className ?: string})=>{
+    return(<Link href={to} className={`w-full px-6 py-3 text-white font-man-rope font-medium border-[#0B1B2B] rounded-lg bg-[#0B1B2B] hover:text-[#0B1B2B] hover:bg-white transition-all duration-300 ${className}`}>
+    {text}
+  </Link>)
+}
+
+export const Button = ({onClick, text, className}:{onClick ?: ()=> void, text : string, className ?: string})=>{
+  return(<button onClick={onClick}  className={`w-full px-6 py-3 text-white font-man-rope font-medium cursor-pointer border border-[#0B1B2B] rounded-lg bg-[#0B1B2B] hover:text-[#0B1B2B] hover:bg-white transition-all duration-300 ${className}`}>
+  {text}
+</button>)
+}
