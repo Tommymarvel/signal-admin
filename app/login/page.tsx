@@ -35,13 +35,15 @@ const page = () => {
           setTimeout(()=>{
             router.push('/')
           },2000)
+          setLoading(false)
         } catch (error) {
           if(error instanceof AxiosError){
             toast.update('signin',{render: error.response?.data.message,
-              type: 'success',
+              type: 'error',
               isLoading: false,
               autoClose: 2000,
             })
+            setLoading(false)
           }
         }
       }}

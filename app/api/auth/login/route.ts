@@ -6,7 +6,7 @@ export async function POST(req:NextRequest) {
     const { email, password } = await req.json();
 
     // Send login request to your backend
-    const res = await axiosPost(`/auth/login`,{ email, password }, false)
+    const res = await axiosPost(`/auth/admin/login`,{ email, password }, false)
     if (!res.statusText) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }

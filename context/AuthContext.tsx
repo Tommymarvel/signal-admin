@@ -5,23 +5,31 @@ import { useRouter } from 'next/navigation';
 import { createContext, useState, useEffect, useContext } from 'react';
 import { toast } from 'react-toastify';
 
+interface userProps {
+  uid : string,
+  id : string,
+  name : string,
+  email : string,
+  role : string,
+  isVerified : string,
+}
 interface authContextProps {
-    user : object | null
-    logout : ()=>void
-    loading : boolean
+  user : userProps | null
+  logout : ()=>void
+  loading : boolean
 }
 const AuthContext = createContext({} as authContextProps);
 
-export function AuthProvider({ children }:{children : React.ReactNode}) {
-  const [user, setUser] = useState(null);
+export function AuthProvider({ children }:{children : React.ReactNode | React.JSX.Element}) {
+  const [user, setUser] = useState<userProps | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter()
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axiosGet('/auth/me',true);
-        console.log(res)
+        const res = await axiosGet('/auth/admin/me',true);
+        setUser(res)
       } catch (err) {
         setUser(null);
         toast.error('Error occured, session expired',{autoClose : 2000})
@@ -39,10 +47,10 @@ export function AuthProvider({ children }:{children : React.ReactNode}) {
 
   const logout = async () => {
     try {
-        await axios.post('/api/auth/logout');
-        setUser(null);
+      await axios.post('/api/auth/logout');
+      setUser(null);
     } catch (error) {
-        toast.error('An error occurred while logging user out')
+      toast.error('An error occurred while logging user out')
     }
     
   };
