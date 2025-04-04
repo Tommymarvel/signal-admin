@@ -25,8 +25,8 @@ export const PrimaryLink = ({to, text, className}:{to : string, text : string, c
   </Link>)
 }
 
-export const Button = ({onClick, text, className}:{onClick ?: ()=> void, text : string, className ?: string})=>{
-  return(<button onClick={onClick}  className={`w-full px-6 py-3 text-white font-man-rope font-medium cursor-pointer border border-[#0B1B2B] rounded-lg bg-[#0B1B2B] hover:text-[#0B1B2B] hover:bg-white transition-all duration-300 ${className}`}>
+export const Button = ({onClick, text, className, disabled}:{onClick ?: ()=> void, text : string, className ?: string, disabled ?: boolean})=>{
+  return(<button onClick={onClick} disabled={disabled}  className={`w-full px-6 py-3 text-white font-man-rope font-medium cursor-pointer border border-[#0B1B2B] rounded-lg bg-[#0B1B2B] hover:text-[#0B1B2B] hover:bg-white transition-all duration-300 disabled:cursor-not-allowed disabled:bg-gray-400 ${className}`}>
   {text}
 </button>)
 }

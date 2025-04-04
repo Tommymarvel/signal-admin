@@ -1,7 +1,9 @@
 "use client"
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserDropDown from "./UserDropDown";
+import { axiosGet } from "@/utils/api";
+import { toast } from "react-toastify";
 
 const users = [
   { id: 1, name: "Amara Onyebuchi", email: "amaonyebuchi@ecs.com", phone: "08147511481", dateJoined: "12/05/2023", kycStatus: "Verified", status: "Active" },
@@ -15,6 +17,7 @@ const UserTable = () => {
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [userList, setUserList] = useState<userDetailProps[]>([])
   const usersPerPage = 5;
 
   const toggleSelectAll = () => {
@@ -35,9 +38,25 @@ const UserTable = () => {
   };
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const currentUsers = userList.slice(indexOfFirstUser, indexOfLastUser);
 
   const paginate = (pageNumber : number) => setCurrentPage(pageNumber);
+
+  const [loading, setLoading] = useState(true)
+  useEffect(()=>{
+    const getUsers = async()=>{
+      try {
+        const res = await axiosGet('/admin/users',true)
+        console.log(res.users)
+        setUserList(res.users)
+      } catch (error) {
+        toast.error('Error occured while fetching user chart data')
+      }finally{
+        setLoading(false)
+      }
+    }
+    getUsers()
+  },[])
 
   return (
     <div className="p-6 bg-white rounded-lg ">
@@ -75,7 +94,16 @@ const UserTable = () => {
           </tr>
         </thead>
         <tbody>
-          {currentUsers.map((user) => (
+          { loading ? (
+            <>
+              {[...Array(5)].map((_, index) => ( // Generate 5 skeleton rows
+                <tr key={index} className="animate-pulse border-gray-100">
+                  <td colSpan={8} className="p-3">
+                    <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
+                  </td>
+                </tr>
+              ))}
+            </>) : currentUsers.map((user) => (
             <tr key={user.id} className="border-t border-gray-100">
               <td className="p-3">
                 <input
@@ -86,19 +114,20 @@ const UserTable = () => {
               </td>
               <td className="p-3">{user.name}</td>
               <td className="p-3">{user.email}</td>
-              <td className="p-3">{user.phone}</td>
-              <td className="p-3">{user.dateJoined}</td>
-              <td className="p-3 text-blue-500">{user.kycStatus}</td>
-              <td className={`p-3 ${user.status === "Active" ? "text-green-500" : "text-red-500"}`}>{user.status}</td>
+              <td className="p-3">{user.phone_number}</td>
+              <td className="p-3">{user.date_joined}</td>
+              <td className="p-3 text-blue-500">{user.kyc_status}</td>
+              <td className={`p-3 ${user.status === true ? "text-green-500" : "text-red-500"}`}>{user.status ?? 'Inactive'}</td>
               <td className="p-3 text-blue-500"><UserDropDown userId="12345"/></td>
             </tr>
           ))}
+
         </tbody>
       </table>
       <div className="flex justify-between items-center mt-4">
-        <p className="text-sm text-gray-600">1-5 of {users.length} users</p>
+        <p className="text-sm text-gray-600">1-5 of {userList.length} users</p>
         <div className="flex space-x-2">
-          {[...Array(Math.ceil(users.length / usersPerPage)).keys()].map((number) => (
+          {[...Array(Math.ceil(userList.length / usersPerPage)).keys()].map((number) => (
             <button
               key={number + 1}
               onClick={() => paginate(number + 1)}

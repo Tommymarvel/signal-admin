@@ -1,6 +1,8 @@
 "use client"
+import { axiosGet } from "@/utils/api";
 import { Field, Form, Formik } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 
 const data = [
@@ -22,8 +24,29 @@ const highestTrade = data.reduce((max, d) => (d.volume > max.volume ? d : max), 
 const averageTrade = (data.reduce((sum, d) => sum + d.volume, 0) / data.length).toFixed(2);
 
 const TradeVolumeChart = () => {
-  return (
-    <div className="p-6 bg-white rounded-lg mt-7">
+  const [loading, setLoading] = useState(true)
+  const [volumesData, setVolumesData] = useState({})
+  useEffect(()=>{
+    const getVolumes = async()=>{
+      try {
+        const res = await axiosGet('/admin/user-activity?year=2025',true)
+        setVolumesData(res)
+      } catch (error) {
+        toast.error('Error occured while fetching chart data')
+      }finally{
+        setLoading(false)
+      }
+    }
+    getVolumes()
+  },[])
+  return (<>
+  {
+    loading ? (<div className="animate-pulse">
+      {/* Chart Skeleton */}
+      <div className="bg-gray-200 h-72 rounded-xl relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse"></div>
+      </div>
+    </div>) : (<div className="p-6 bg-white rounded-lg mt-7">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Trade Volume Chart</h2>
         <Formik
@@ -68,7 +91,9 @@ const TradeVolumeChart = () => {
           </p>
         </div>
       </div>
-    </div>
+    </div>)
+  }
+  </>
   );
 };
 

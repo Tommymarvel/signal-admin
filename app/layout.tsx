@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ToastContainer } from "react-toastify";
+
+
 
 export const metadata: Metadata = {
   title: "Signal Admin",
@@ -17,6 +20,7 @@ export default function RootLayout({
         className={`bg-white-200 font-man-rope antialiased `}
       >
         {children}
+        <ToastContainer position="bottom-right" theme="dark" draggable/>
       </body>
     </html>
   );

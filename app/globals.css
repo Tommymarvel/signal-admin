@@ -22,5 +22,9 @@
   --color-error-red : #CF491E;
   --color-pr3: #F9F6FF;
   --color-pr2: #454ADE;
+  --color-office-brown-700: #645D5D;
 }
 
+.shadowy{
+  box-shadow: 0px 3px 2px -2px rgba(235, 80, 23, 0.06), 0px 5px 3px -2px rgba(235, 80, 23, 0.02);
+}

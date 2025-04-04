@@ -1,6 +1,8 @@
 "use client"
+import { axiosGet } from "@/utils/api";
 import { Field, Form, Formik } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const data = [
@@ -19,8 +21,28 @@ const data = [
 ];
 
 const UserActivityChart = () => {
-  return (
-    <div className="p-6 bg-white rounded-lg mt-7 font-man-rope">
+  const [loading, setLoading] = useState(true)
+  const [userActivity, setUserActivity] = useState({})
+  useEffect(()=>{
+    const getVolumes = async()=>{
+      try {
+        const res = await axiosGet('/admin/user-activity?year=2025',true)
+        setUserActivity(res)
+      } catch (error) {
+        toast.error('Error occured while fetching user chart data')
+      }finally{
+        setLoading(false)
+      }
+    }
+    getVolumes()
+  },[])
+  return (<>
+  {
+    loading ? (<div className="animate-pulse">
+      <div className="bg-white h-72  relative mt-7 rounded-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse"></div>
+      </div>
+    </div>)  :(<div className="p-6 bg-white rounded-lg mt-7 font-man-rope">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">User Activity Chart</h2>
         <Formik
@@ -29,12 +51,12 @@ const UserActivityChart = () => {
 
         }}
         >
-            <Form>
-                <Field as="select" name="timeframe" >
-                    <option value="Last 2 weeks">Last Year</option>
-                    <option value="Last month">This Year</option>
-                </Field>
-            </Form>
+          <Form>
+            <Field as="select" name="timeframe" >
+              <option value="Last 2 weeks">Last Year</option>
+              <option value="Last month">This Year</option>
+            </Field>
+          </Form>
         </Formik>
       </div>
       <ResponsiveContainer width="100%" height={250}>
@@ -51,8 +73,9 @@ const UserActivityChart = () => {
           <Area type="monotone" dataKey="users" stroke="#17BC2E" fill="url(#colorUsers)" strokeWidth={4} fillOpacity={0.3} />
         </AreaChart>
       </ResponsiveContainer>
-    </div>
-  );
+    </div>)
+  }
+  </>);
 };
 
 export default UserActivityChart;

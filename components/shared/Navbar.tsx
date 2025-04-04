@@ -1,8 +1,23 @@
 "use client"
-
+import { useAuth } from "@/context/AuthContext"
 import Image from "next/image"
+import { useEffect, useState } from "react"
 
 const Navbar = () => {
+  const [userInfo, setUserInfo] = useState({initials : '', name : '', email : '',role :''})
+  const {user} = useAuth()
+  useEffect(()=>{
+    if(user){
+      const {name,email,role} = user
+      const initials = name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
+      setUserInfo((prev)=>({...prev, name, email, initials, role}));
+    }
+  },[user])
+  
   return (
     <div className="flex justify-between border-b bg-white border-gray-100 py-4 lg:py-5 px-10">
       <div className="font-inter font-semibold text-black lg:text-[2.22vw]">
@@ -17,14 +32,13 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-4">
           <p className="font-medium w-10 h-10 bg-[#75AD74] text-white rounded-full flex justify-center items-center text-[1.1vw]">
-            DN
+            {userInfo.initials}
           </p>
           <div>
             <div>
               <h4 className="text-black text-[1.25vw] font-semibold">
-                Daniel A.
-
-                <span className="inline-block text-xs text-pr2 px-2 py-1 bg-[#EFEFF9] rounded-xl"> Admin</span>
+                {`${userInfo.name.substring(0,8)}.`}
+                <span className="inline-block text-xs text-pr2 px-2 py-1 bg-[#EFEFF9] rounded-xl"> {userInfo.role}</span>
               </h4>
               <p className="text-xs text-gray-300">
                 SignalwaveX
