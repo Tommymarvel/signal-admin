@@ -25,7 +25,7 @@ const MainComp = ({children} : {children : React.ReactNode})=>{
   return(<>
   {
     loading ? (<div className='h-screen w-full flex items-center justify-center'>
-      <Image src={`/animations/animatedBall.svg`} alt='ball' width={120} height={120} />
+      <Image src={`/animations/animatedBall.svg`} alt='ball' width={120} height={120} priority />
     </div>) : (<div className="w-full h-full overflow-y-auto">
       <Navbar/>
       {children}

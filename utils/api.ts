@@ -18,7 +18,6 @@ export const axiosGet = async (endpoint:string, withAuth ?: boolean) => {
             return error
         }
     }
-    console.log(base_url)
     const res = await axios.get(`${base_url}${endpoint}`, { headers, withCredentials: withAuth });
   
     return res.data;

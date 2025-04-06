@@ -1,11 +1,33 @@
 "use client"
 import { useAuth } from "@/context/AuthContext"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
+import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
 const Navbar = () => {
   const [userInfo, setUserInfo] = useState({initials : '', name : '', email : '',role :''})
+  const [pageName, setPageName] = useState('')
+  const pathNames: { [key: string]: string } = {
+    '/' : 'Dashboard',
+    '/userManagement' : 'User Management',
+    '/tradeManagement' : 'Trade Management',
+    '/wallet' : 'Wallet',
+    '/transactions' : 'Transactions',
+    '/adminManagement' : 'Admin Management'
+  }
+
+  const pathname = usePathname()
+
+  useEffect(()=>{
+    setPageName(pathNames[pathname] || '')
+    
+  },[pathname])
+
+
+
   const {user} = useAuth()
+
   useEffect(()=>{
     if(user){
       const {name,email,role} = user
@@ -21,7 +43,7 @@ const Navbar = () => {
   return (
     <div className="flex justify-between border-b bg-white border-gray-100 py-4 lg:py-5 px-10">
       <div className="font-inter font-semibold text-black lg:text-[2.22vw]">
-        Dashboard
+        {pageName}
       </div>
       <div className="flex items-center gap-4">
         <div className="px-7 border-x border-gray-100 ">

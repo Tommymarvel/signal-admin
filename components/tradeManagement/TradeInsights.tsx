@@ -1,38 +1,52 @@
+'use client'
+import { insightProps } from "@/declarations/dashboard.declaration"
+import { axiosGet } from "@/utils/api"
 import Image from "next/image"
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
 
 const TradeInsight = () => {
-  return (
-    <div className="p-6 rounded-[20px] bg-white font-man-rope">
-      <header className="mb-6 text-black font-semibold text-[1.25vw]">
-        Key Metrics
-      </header>
-      <div>
-      
-        <div className="flex justify-between items-center w-[90%]">
-          <Metric
-            image="/dashboard/insight/totalTrx.svg"
-            title="Total Trades"
-            value="$1,900,774.00"
-          />
-          <Metric
-            image="/dashboard/insight/activeTrade.svg"
-            title="Active Trades"
-            value="14"
-          />
-          <Metric
-            image="/dashboard/insight/newUser.svg"
-            title="Completed Trades"
-            value="7,621"
-          />
-          <Metric
-            image="/dashboard/insight/totalUsers.svg"
-            title="Failed Trades"
-            value="11,213"
-          />
-        </div>
-      </div>
-    </div>
-  );
+  const [loading, setLoading] = useState(true)
+  const [insightData, setInsightData] = useState({} as insightProps)
+  useEffect(()=>{
+    const getInsights = async()=>{
+        try {
+            const res = await axiosGet('/admin/trading-stats',true)
+            setInsightData(res)
+        } catch (error) {
+            toast.error('got here')
+        }finally{
+            setLoading(false)
+        }
+    }
+    getInsights()
+  },[])
+  return (<>
+    {
+      loading ? ( <div className="animate-pulse">
+          {/* Key Insights Skeleton */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            {Array(4).fill(0).map((_, index) => (
+              <div key={index} className="bg-gray-300 h-20 rounded-xl"></div>
+            ))}
+          </div>
+        </div>) : (<div className="p-6 rounded-[20px] bg-white font-man-rope">
+          <header className="mb-6 text-black font-semibold text-[1.25vw]">
+              Key Insights
+          </header>
+          <div>
+              <p className="mb-5 font-medium text-xs text-gray-400">This month’s metrics</p>
+              <div className="flex justify-between items-center w-[90%]">
+                  <Metric image="/dashboard/insight/totalTrx.svg" title="Total Trades" value={`${insightData?.total_trades}`} />
+                  <Metric image="/dashboard/insight/activeTrade.svg" title="Active Trades" value={`${insightData?.active_trades}`} />
+                  <Metric image="/dashboard/insight/newUser.svg" title="New User Registration" value={`${insightData?.completed_trades}`} />
+                  <Metric image="/dashboard/insight/totalUsers.svg" title="Total Users" value={`${insightData.failed_trades}`} />
+              </div>
+          </div>
+      </div>)
+    }
+    </>
+    )
 }
 
 export default TradeInsight;

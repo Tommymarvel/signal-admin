@@ -1,70 +1,56 @@
 "use client"
 import { axiosGet } from "@/utils/api";
-import { Field, Form, Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 
-const data = [
-  { month: "Jan", volume: 600000 },
-  { month: "Feb", volume: 620000 },
-  { month: "Mar", volume: 750000 },
-  { month: "Apr", volume: 870000 },
-  { month: "May", volume: 1100000 },
-  { month: "June", volume: 400000 },
-  { month: "July", volume: 500000 },
-  { month: "Aug", volume: 750000 },
-  { month: "Sep", volume: 900000 },
-  { month: "Oct", volume: 200000 },
-  { month: "Nov", volume: 300000 },
-  { month: "Dec", volume: 800000 }
-];
-
-const highestTrade = data.reduce((max, d) => (d.volume > max.volume ? d : max), data[0]);
-const averageTrade = (data.reduce((sum, d) => sum + d.volume, 0) / data.length).toFixed(2);
 
 const TradeVolumeChart = () => {
-  const [loading, setLoading] = useState(true)
-  const [volumesData, setVolumesData] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [volumesData, setVolumesData] = useState<{month : number, total_volume : number}[]>([])
+  const [filter, setFilter] = useState(String(new Date().getUTCFullYear()))
+ 
   useEffect(()=>{
+    setLoading(true)
+    const getMonthName = (monthNumber: number) => {
+      const date = new Date(2020, monthNumber - 1);  // January is 0, so we subtract 1
+      return date.toLocaleString('en-US', { month: 'short' });  // 'short' gives the abbreviated month
+    };
     const getVolumes = async()=>{
       try {
-        const res = await axiosGet('/admin/user-activity?year=2025',true)
-        setVolumesData(res)
+        const res = await axiosGet(`/admin/trade-volume?year=${filter}`,true)
+        const formattedData = res.trade_volume_by_month.map((item:{month : number, total_volume : string})=>({...item, month : getMonthName(item.month), total_volume : Number(item.total_volume)}))
+        setVolumesData(()=>formattedData)
       } catch (error) {
+        setLoading(false)
         toast.error('Error occured while fetching chart data')
       }finally{
         setLoading(false)
       }
     }
     getVolumes()
-  },[])
+    
+    console.log('ran again')
+  },[filter])
+  const highestTrade = volumesData?.reduce((max, d) => (d.total_volume > max.total_volume ? d : max), volumesData[0]);
+  const averageTrade = (volumesData?.reduce((sum, d) => sum + d.total_volume, 0) / volumesData.length).toFixed(2);
   return (<>
   {
     loading ? (<div className="animate-pulse">
       {/* Chart Skeleton */}
-      <div className="bg-gray-200 h-72 rounded-xl relative">
+      <div className="bg-gray-200 h-72 rounded-xl relative my-7">
         <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse"></div>
       </div>
     </div>) : (<div className="p-6 bg-white rounded-lg mt-7">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Trade Volume Chart</h2>
-        <Formik
-        initialValues={{year : 'Last year'}}
-        onSubmit={()=>{
-
-        }}
-         >
-            <Form>
-                <Field as="select" name="year" >
-                    <option value="Last year">Last Year</option>
-                    <option value="This Year">This Year</option>
-                </Field>
-            </Form>
-        </Formik>
+        <select name="" id="" className="cursor-pointer p-2 border outline-none rounded-lg" value={filter} onChange={(e: ChangeEvent<HTMLSelectElement>)=> setFilter(()=> (e.target.value))}>
+          <option value={new Date().getUTCFullYear() - 1}>Last Year</option>
+          <option value={new Date().getUTCFullYear()}>This Year</option>
+        </select>
       </div>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
+        <BarChart data={volumesData} margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3"  />
           <XAxis dataKey="month" tickLine={false} axisLine={false} />
           <YAxis label={{ 
@@ -75,22 +61,25 @@ const TradeVolumeChart = () => {
               style: { fontSize: 12, textAnchor: 'middle' }
             }}  tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
           <Tooltip />
-          <Bar dataKey="volume" fill="#454ADE" barSize={50} />
+          <Bar dataKey="total_volume" fill="#454ADE" barSize={50} />
         </BarChart>
       </ResponsiveContainer>
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <div className="py-3 px-4 bg-white-200">
-          <p className=" text-sm">
-            In the month of <span className="font-bold text-pr2">{highestTrade.month}</span>, users had the highest trade volume
-            amounting to <span className="font-bold">${highestTrade.volume.toLocaleString()}.</span>
-          </p>
-        </div>
-        <div className="py-3 px-4 bg-white-200">
-          <p className=" text-sm">
-            The average trade amount was <span className="font-bold text-pr2">${parseFloat(averageTrade).toLocaleString()}.</span>
-          </p>
-        </div>
-      </div>
+      {
+        volumesData.length > 0 ? (<div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="py-3 px-4 bg-white-200">
+            <p className=" text-sm">
+              In the month of <span className="font-bold text-pr2">{highestTrade?.month}</span>, users had the highest trade volume
+              amounting to <span className="font-bold">${highestTrade?.total_volume.toLocaleString()}.</span>
+            </p>
+          </div>
+          <div className="py-3 px-4 bg-white-200">
+            <p className=" text-sm">
+              The average trade amount was <span className="font-bold text-pr2">${parseFloat(averageTrade).toLocaleString()}.</span>
+            </p>
+          </div>
+        </div>) : (<div>No data available for this year</div>)
+      }
+      
     </div>)
   }
   </>

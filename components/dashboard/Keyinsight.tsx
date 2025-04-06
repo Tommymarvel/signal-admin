@@ -53,7 +53,7 @@ export default Keyinsight
 
 const Metric = ({image, title, value,unit} : {image : string, title : string, value : string, unit ?: string})=>{
     return(<div className="font-man-rope flex items-center gap-3">
-        <Image src={image} alt="" width={40} height={40}/>
+        <Image src={image} alt="" width={40} height={40} className="h-auto"/>
         <div>
             <h6 className="text-xs text-gray-400 mb-1">{title}</h6>
             <p className="text-lg text-black font-semibold">{unit}{value}</p>

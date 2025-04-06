@@ -1,130 +1,54 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import NewTradeModal from './modal/NewTradeModal';
+import { axiosGet } from '@/utils/api';
+import { toast } from 'react-toastify';
 
 interface Trade {
   id: number;
-  tradeId: string;
-  product: string;
-  tradeType: 'Buy' | 'Sell';
-  price: number;
+  tid: string;
+  trading_pair: string;
+  order_direction: 'PUT' | 'CALL';
+  price: string;
   followed: number;
   totalValue: number;
-  status: 'Active' | 'Failed' | 'Completed' | 'Pending';
+  status: 'active' | 'failed' | 'completed' | 'pending';
 }
 
-// Mock data for demonstration
-const allTrades: Trade[] = [
-  {
-    id: 1,
-    tradeId: 'TRD-001',
-    product: 'BTC',
-    tradeType: 'Buy',
-    price: 42500,
-    followed: 3.613,
-    totalValue: 21250,
-    status: 'Active',
-  },
-  {
-    id: 2,
-    tradeId: 'TRD-002',
-    product: 'BTC',
-    tradeType: 'Buy',
-    price: 42500,
-    followed: 0.734,
-    totalValue: 12000,
-    status: 'Failed',
-  },
-  {
-    id: 3,
-    tradeId: 'TRD-003',
-    product: 'ETH',
-    tradeType: 'Sell',
-    price: 2800,
-    followed: 5.12,
-    totalValue: 14336,
-    status: 'Completed',
-  },
-  {
-    id: 4,
-    tradeId: 'TRD-004',
-    product: 'BTC',
-    tradeType: 'Buy',
-    price: 43000,
-    followed: 1.05,
-    totalValue: 45150,
-    status: 'Completed',
-  },
-  {
-    id: 5,
-    tradeId: 'TRD-005',
-    product: 'ETH',
-    tradeType: 'Buy',
-    price: 2850,
-    followed: 0.35,
-    totalValue: 997.5,
-    status: 'Pending',
-  },
-  {
-    id: 6,
-    tradeId: 'TRD-006',
-    product: 'BTC',
-    tradeType: 'Buy',
-    price: 41000,
-    followed: 2.75,
-    totalValue: 112750,
-    status: 'Active',
-  },
-  {
-    id: 7,
-    tradeId: 'TRD-007',
-    product: 'BTC',
-    tradeType: 'Sell',
-    price: 41500,
-    followed: 3.0,
-    totalValue: 124500,
-    status: 'Failed',
-  },
-  {
-    id: 8,
-    tradeId: 'TRD-008',
-    product: 'ETH',
-    tradeType: 'Sell',
-    price: 3000,
-    followed: 4.2,
-    totalValue: 12600,
-    status: 'Active',
-  },
-  {
-    id: 8,
-    tradeId: 'TRD-008',
-    product: 'ETH',
-    tradeType: 'Sell',
-    price: 3000,
-    followed: 4.2,
-    totalValue: 12600,
-    status: 'Active',
-  },
-  
-  // ... add as many as needed
-];
 
 export default function TradesTable() {
   // Table state
-  const [trades, setTrades] = useState<Trade[]>(allTrades);
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const tradesPerPage = 10;
+
+  useEffect(()=>{
+    const getTrades = async()=>{
+      try {
+        setLoading(true)
+        const res = await axiosGet(`/admin/trade-calls`,true)
+        setTrades(res.trade_calls)
+      } catch (error) {
+        toast.error('Error occurred while fetching trade data')
+      }finally{
+        setLoading(false)
+      }
+    }
+    getTrades()
+  },[])
 
   // Filter trades by search
   const filteredTrades = trades.filter((trade) => {
     const lowerSearch = searchTerm.toLowerCase();
     return (
-      trade.tradeId.toLowerCase().includes(lowerSearch) ||
-      trade.product.toLowerCase().includes(lowerSearch)
+      trade.tid?.toLowerCase().includes(lowerSearch) ||
+      String(trade.id)?.toLowerCase().includes(lowerSearch) ||
+      trade.trading_pair?.toLowerCase().includes(lowerSearch)
     );
   });
 
@@ -193,25 +117,35 @@ export default function TradesTable() {
           </tr>
         </thead>
         <tbody>
-          {currentTrades.map((trade) => {
+          { loading ? (
+            <>
+              {[...Array(5)].map((_, index) => ( // Generate 5 skeleton rows
+                <tr key={index} className="animate-pulse border-gray-100">
+                  <td colSpan={8} className="p-3">
+                    <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
+                  </td>
+                </tr>
+              ))}
+            </>) :
+          currentTrades.map((trade) => {
             // Color-coding statuses
             let statusColor = 'text-gray-500';
-            if (trade.status === 'Active') statusColor = 'text-green-500';
-            else if (trade.status === 'Failed') statusColor = 'text-red-500';
-            else if (trade.status === 'Completed')
+            if (trade.status == 'active') statusColor = 'text-green-500';
+            else if (trade.status == 'failed') statusColor = 'text-red-500';
+            else if (trade.status == 'completed')
               statusColor = 'text-gray-700';
-            else if (trade.status === 'Pending')
+            else if (trade.status == 'pending')
               statusColor = 'text-yellow-500';
 
             return (
-              <tr key={trade.id} className="border-t border-gray-100">
-                <td className="p-3">{trade.tradeId}</td>
-                <td className="p-3">{trade.product}</td>
-                <td className="p-3">{trade.tradeType}</td>
-                <td className="p-3">{trade.price.toLocaleString()}</td>
-                <td className="p-3">{trade.followed}</td>
-                <td className="p-3">{trade.totalValue.toLocaleString()}</td>
-                <td className={`p-3 font-medium ${statusColor}`}>
+              <tr key={trade.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
+                <td className="p-3">{trade.tid || "N/A"}</td>
+                <td className="p-3">{trade.trading_pair}</td>
+                <td className="p-3">{trade.order_direction}</td>
+                <td className="p-3">{trade?.price?.toLocaleString() || "N/A"}</td>
+                <td className="p-3">{trade?.followed || "N/A"}</td>
+                <td className="p-3">{trade?.totalValue?.toLocaleString() || "N/A"}</td>
+                <td className={`p-3 font-medium capitalize ${statusColor}`}>
                   {trade.status}
                 </td>
                 <td className="p-3">

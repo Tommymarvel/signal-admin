@@ -5,17 +5,11 @@ import UserDropDown from "./UserDropDown";
 import { axiosGet } from "@/utils/api";
 import { toast } from "react-toastify";
 
-const users = [
-  { id: 1, name: "Amara Onyebuchi", email: "amaonyebuchi@ecs.com", phone: "08147511481", dateJoined: "12/05/2023", kycStatus: "Verified", status: "Active" },
-  { id: 2, name: "Paul Ashiwaju", email: "paashiwaju@ecs.com", phone: "08147511481", dateJoined: "17/05/2023", kycStatus: "Pending", status: "Active" },
-  { id: 3, name: "Bimpe Arinshaun", email: "paashiwaju@ecs.com", phone: "08147511481", dateJoined: "17/05/2023", kycStatus: "Rejected", status: "Inactive" },
-  { id: 4, name: "Paul Ashiwaju", email: "paashiwaju@ecs.com", phone: "08147511481", dateJoined: "17/05/2023", kycStatus: "Verified", status: "Active" },
-  { id: 5, name: "Amara Onyebuchi", email: "amaonyebuchi@ecs.com", phone: "08147511481", dateJoined: "12/05/2023", kycStatus: "Verified", status: "Suspended" }
-];
 
 const UserTable = () => {
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [userList, setUserList] = useState<userDetailProps[]>([])
   const usersPerPage = 5;
@@ -36,11 +30,24 @@ const UserTable = () => {
         : [...prevSelected, id]
     );
   };
+
+  const filteredUsers = userList.filter((users) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return (
+      users.name?.toLowerCase().includes(lowerSearch) ||
+      String(users.id)?.toLowerCase().includes(lowerSearch) ||
+      users.email?.toLowerCase().includes(lowerSearch)
+    );
+  });
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = userList.slice(indexOfFirstUser, indexOfLastUser);
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   const paginate = (pageNumber : number) => setCurrentPage(pageNumber);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // reset to first page when searching
+  };
 
   const [loading, setLoading] = useState(true)
   useEffect(()=>{
@@ -66,6 +73,8 @@ const UserTable = () => {
             <input
             type="text"
             placeholder="Search by user ID, email address"
+            value={searchTerm}
+            onChange={handleSearchChange}
             className="w-full border-none outline-none text-gray-400 placeholder:text-gray-200"
             />
         </div>
@@ -104,7 +113,7 @@ const UserTable = () => {
                 </tr>
               ))}
             </>) : currentUsers.map((user) => (
-            <tr key={user.id} className="border-t border-gray-100">
+            <tr key={user.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
               <td className="p-3">
                 <input
                   type="checkbox"
@@ -112,7 +121,7 @@ const UserTable = () => {
                   onChange={() => toggleSelectUser(user.id)}
                 />
               </td>
-              <td className="p-3">{user.name}</td>
+              <td className="p-3 capitalize">{user.name ?? "N/A"}</td>
               <td className="p-3">{user.email}</td>
               <td className="p-3">{user.phone_number}</td>
               <td className="p-3">{user.date_joined}</td>
