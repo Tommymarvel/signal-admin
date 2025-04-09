@@ -18,7 +18,7 @@ const UserTable = () => {
     if (selectAll) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(users.map((user) => user.id));
+      setSelectedUsers(userList.map((user) => user.id));
     }
     setSelectAll(!selectAll);
   };
@@ -140,7 +140,7 @@ const UserTable = () => {
             <button
               key={number + 1}
               onClick={() => paginate(number + 1)}
-              className={`px-3 py-1 border rounded-md ${currentPage === number + 1 ? "bg-blue-500 text-white" : "bg-white text-gray-700"}`}
+              className={`px-3 py-1 border rounded-md cursor-pointer ${currentPage === number + 1 ? "bg-blue-500 text-white" : "bg-white text-gray-700"}`}
             >
               {number + 1}
             </button>
