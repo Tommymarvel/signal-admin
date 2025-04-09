@@ -7,7 +7,7 @@ const page = () => {
     <div className="my-5 mx-11">
       <header className=' mb-8'>
         <Link href={'/transactions'} className='px-2 py-2 text-gray-100 font-man-rope bg-[#1B1F3B] rounded-lg font-semibold text-lg'>
-            Transactions Insights 
+            Admin Team Members
         </Link>
       </header>
       <main className='h-full'>
