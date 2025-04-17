@@ -181,24 +181,32 @@ const page = () => {
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [refresh, setRefresh] = useState(false)
 
   const adminsPerPage = 10;
 
   useEffect(()=>{
-    // const getAdmins = async()=>{
-    //   try {
-    //     setLoading(true)
-    //     const res = await axiosGet(`/admin/trade-calls`,true)
-    //     setTrades(res.trade_calls)
-    //   } catch (error) {
-    //     toast.error('Error occurred while fetching admin data')
-    //   }finally{
-    //     setLoading(false)
-    //   }
-    // }
-    // getAdmins()
-    setAdmins(adminList)
-  },[])
+    const getAdmins = async()=>{
+      try {
+        setLoading(true)
+        const res = await axiosGet(`/admin/all-admin`,true)
+        console.log(res.admins)
+        const formattedList = res.admins.map((item:adminDetails | any)=>({
+          ...item,
+          dateCreated : item['created_at'] ,
+          role : item.role === 'finance_admin' ? 'Finance Admin' : 'Support Admin'
+        }))
+        setAdmins(formattedList)
+      } catch (error) {
+        toast.error('Error occurred while fetching admin data')
+      }finally{
+        setLoading(false)
+      }
+    }
+    getAdmins()
+  },[refresh])
+
+  const toggleRefresh = ()=>setRefresh(!refresh)
 
   // Filter trades by search
   const filteredAdmins = admins.filter((admin) => {
@@ -243,7 +251,7 @@ const page = () => {
       </header>
       <main className='h-full'>
         {
-          currentAdmins.length > 0 ? (<section>
+          loading || currentAdmins.length > 0 ? (<section>
           <div className="flex justify-between items-center mb-4">
             {/* Search Bar */}
             <div className="flex items-center gap-3 w-full max-w-[22.2vw] border border-gray-100 py-3 px-5 rounded-lg">
@@ -270,11 +278,11 @@ const page = () => {
               Add Admins
             </button>
           </div>
-          <AdminTable adminData={currentAdmins} loading={loading} adminTools={{indexOfFirstAdmin,indexOfLastAdmin,currentPage,paginate,totalPages}} />
+          <AdminTable toggleRefresh={toggleRefresh} adminData={currentAdmins} loading={loading} adminTools={{indexOfFirstAdmin,indexOfLastAdmin,currentPage,paginate,totalPages}} />
           </section>)  : (<NoAdmins createAdminHandler={toggleAddAdmin} />)
         }
         
-        <AdminPopUp IsOpen={addAdminIsOpen} toggleAddAdmin={toggleAddAdmin} popupType='add' />
+        <AdminPopUp toggleRefresh={toggleRefresh} IsOpen={addAdminIsOpen} toggleAddAdmin={toggleAddAdmin} popupType='add' />
       </main>
     </div>
   )

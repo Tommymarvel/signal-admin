@@ -30,7 +30,7 @@ export const adminOptions: adminOption[] = [
 ]
 
 export const addAdminSchema = Yup.object().shape({
-    name : Yup.string().required('Last name is required').trim(),
+    name : Yup.string().required('name is required').trim(),
     email : Yup.string().email('Must be a valid email address').lowercase().required('Email Field is required').trim(),
     role : Yup.string().oneOf(validRoles).required('Role is required')
 })

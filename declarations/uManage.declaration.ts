@@ -1,9 +1,10 @@
 interface userDetailProps {
     id : number
+    uid : string
     name: string | null,
     email: string,
     phone_number: string | null,
-    status :  boolean
+    status :  string
     role: string,
     date_joined: string,
     is_verified: boolean,

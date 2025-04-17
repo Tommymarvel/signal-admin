@@ -1,7 +1,40 @@
+'use client'
 import { Button, PrimaryLink } from "@/components/shared/NavLink"
+import { axiosGet, axiosPost } from "@/utils/api"
+import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
 
-const page = async({params,}: {params: Promise<{ slug: string }>}) => {
-    const { slug } = await params
+const page = () => {
+    const { user } = useParams()
+    const [userInfo, setUserInfo] = useState<userDetailProps | any>({} as userDetailProps)
+    useEffect(()=>{
+        const getUserInfo = async()=>{
+            try {
+                const res = await axiosGet(`/admin/users?search=${user}`,true)
+                console.log(res.users[0])
+                setUserInfo(res.users[0])
+            } catch (error) {
+                toast.error('Unable to fetch user information')
+            }
+        }
+        getUserInfo()
+    },[])
+
+    const handleSuspendUser = async(user_id : string|number|undefined)=>{
+        try {
+          const confirm = window.confirm("Are you sure you want to take delete this Admin")
+    
+          if(confirm){
+            await axiosPost('/admin/user/ban',{user_id},true)
+            toast.success('User Deleted Successfully')
+          }
+          return;
+        } catch (error) {
+          console.log(error)
+          toast.error('An error occurred while deleting admin')
+        }
+    }
     const explanationHeaderStyles = 'text-black text-[1.2vw] font-semibold'
     const explanationBodyStyles = 'text-gray-400 text-[1vw] font-medium'
   return (
@@ -9,7 +42,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
       <header className="font-man-rope text-[1.2vw] text-[rgba(51,51,51,0.60)] flex gap-4 mb-6">
         <p>User List</p>
         <p className="text-[#858585] font-medium">&gt;</p>
-        <p className="font-medium text-[rgba(51,51,51,0.80)]">Paul Ashiwaju</p>
+        <p className="font-medium text-[rgba(51,51,51,0.80)]">{userInfo.name || "N/A"}</p>
       </header>
       <main className="space-y-6 w-[80%]">
         <ExplanationItems>
@@ -22,7 +55,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Name
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                        Paul Ashiwaju
+                        {userInfo.name || "N/A"}
                     </p>
                 </div>
                 <div>
@@ -30,7 +63,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Email Address
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                        talktoasuquo@gmail.com
+                        {userInfo.email || "N/A"}
                     </p>
                 </div>
                 <div>
@@ -38,7 +71,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Phone Number
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                        12345-12345-1234
+                        {userInfo.phone_number || "N/A"}
                     </p>
                 </div>
                 
@@ -53,8 +86,8 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                     <h2 className={`${explanationHeaderStyles}`}>
                         Account Status
                     </h2>
-                    <p className={`${explanationBodyStyles} text-green-400`}>
-                        Active
+                    <p className={`${explanationBodyStyles} ${userInfo.status == 'Inacitve' ? 'text-red-400' :  'text-green-400'} `}>
+                     {userInfo.status == 'Inacitve' ? "Inactive" : "Active"}
                     </p>
                 </div>
                 <div>
@@ -62,7 +95,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Date Joined
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                        12/12/2024
+                        {userInfo.date_joined || "N/A"}
                     </p>
                 </div>
                 <div>
@@ -70,7 +103,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Account Tier
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                        Tier 1
+                        {userInfo['tier'] || "N/A"}
                     </p>
                 </div>
             </section>
@@ -85,7 +118,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Approval Status
                     </h2>
                     <p className={`${explanationBodyStyles} text-[#F3A218]`}>
-                        Pending Approval
+                        {userInfo.appStatus || "N/A"}
                     </p>
                 </div>
                 <div>
@@ -93,7 +126,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Document Uploaded
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                        driverslicense.pdf
+                        {userInfo.document  || 'N/A'}
                     </p>
                 </div>
                 <div>
@@ -101,7 +134,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         KYC Status
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                        Not Verified
+                        {userInfo.kyc_status || "N/A"}
                     </p>
                 </div>
             </section>
@@ -116,7 +149,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Current Balance
                     </h2>
                     <p className={`${explanationBodyStyles} text-[#F3A218]`}>
-                        $32,000
+                        {userInfo.current_balance}
                     </p>
                 </div>
                 <div>
@@ -124,7 +157,7 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Total Withdrawals
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                       $48,000
+                        {userInfo.total_withdrawals}
                     </p>
                 </div>
                 <div>
@@ -132,13 +165,13 @@ const page = async({params,}: {params: Promise<{ slug: string }>}) => {
                         Total Deposit
                     </h2>
                     <p className={`${explanationBodyStyles}`}>
-                        #34,221
+                        {userInfo.total_deposits}
                     </p>
                 </div>
             </section>
         </ExplanationItems>
         <div className="flex items-center justify-end py-6">
-            <Button text="Suspend User" className="max-w-[180px]" />
+            <Button onClick={()=>handleSuspendUser(userInfo.id)} text="Suspend User" className="max-w-[180px]" />
         </div>
       </main>
     </div>

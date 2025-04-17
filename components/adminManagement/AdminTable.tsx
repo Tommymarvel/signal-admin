@@ -1,10 +1,10 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { adminDetails } from '@/declarations/addAdmin.declaration';
 import AdminDropDown from './AdminDropDown';
 
-export default function AdminTable({loading, adminData, adminTools} : {loading : boolean, adminData : adminDetails[], adminTools : {indexOfFirstAdmin : number, indexOfLastAdmin : number, totalPages : number, currentPage : number, paginate : (value : number)=> void}}) {
+export default function AdminTable({loading, adminData, adminTools, toggleRefresh} : {loading : boolean, adminData : adminDetails[], adminTools : {indexOfFirstAdmin : number, indexOfLastAdmin : number, totalPages : number, currentPage : number, paginate : (value : number)=> void}, toggleRefresh : ()=>void}) {
 
   return (
     <div className="bg-white rounded-lg font-inter">
@@ -41,10 +41,10 @@ export default function AdminTable({loading, adminData, adminTools} : {loading :
                 </td>
                 <td className="p-3">{admin.email}</td>
                 <td className="p-3">{admin.role}</td>
-                <td className="p-3">{admin.dateCreated}</td>
+                <td className="p-3">{new Date(admin.dateCreated).toLocaleString()}</td>
                 <td className="p-3">{admin.status}</td>
                 <td className="p-3">
-                  <AdminDropDown adminData={admin} />
+                  <AdminDropDown toggleRefresh={toggleRefresh} adminData={admin} />
                 </td>
               </tr>
             );

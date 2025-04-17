@@ -29,7 +29,7 @@ export const axiosPost = async (endpoint:string, data?: object, withAuth ?: bool
     if (withAuth) {
         try {
         // Request the token from the backend
-        const tokenRes = await axios.get("/api/auth-token", { withCredentials: true });
+        const tokenRes = await axios.get("/api/auth/auth-token", { withCredentials: true });
         const token = tokenRes.data.token;
 
         headers = {

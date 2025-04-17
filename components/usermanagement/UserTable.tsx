@@ -54,10 +54,9 @@ const UserTable = () => {
     const getUsers = async()=>{
       try {
         const res = await axiosGet('/admin/users',true)
-        console.log(res.users)
         setUserList(res.users)
       } catch (error) {
-        toast.error('Error occured while fetching user chart data')
+        toast.error('Error occured while fetching users data')
       }finally{
         setLoading(false)
       }
@@ -126,8 +125,8 @@ const UserTable = () => {
               <td className="p-3">{user.phone_number}</td>
               <td className="p-3">{user.date_joined}</td>
               <td className="p-3 text-blue-500">{user.kyc_status}</td>
-              <td className={`p-3 ${user.status === true ? "text-green-500" : "text-red-500"}`}>{user.status ?? 'Inactive'}</td>
-              <td className="p-3 text-blue-500"><UserDropDown userId="12345"/></td>
+              <td className={`p-3 ${user.status === 'Active' ? "text-green-500" : "text-red-500"}`}>{user.status === 'Inactive' ? 'Inactive' : "Active"}</td>
+              <td className="p-3 text-blue-500"><UserDropDown userId={user.uid}/></td>
             </tr>
           ))}
 
