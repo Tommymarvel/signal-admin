@@ -1,9 +1,46 @@
+'use client'
 import TransactionsChart from '@/components/transaction/TransactionChart'
+import { axiosGet } from '@/utils/api'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+
+
+export interface insightProps { 
+    "deposit_count": number
+    "withdraw_count": number
+    "transaction_count": number
+    "total_deposited": string,
+    "total_withdrawn": string,
+    "deposit_vs_withdraw_percentage": string
+}
 
 const page = () => {
+    const [loading,setLoading] = useState(true)
+    const [filter,setFilter] = useState(`mpnth=${new Date().getMonth() + 1}`)
+    const [insights, setInsights] = useState<insightProps>({} as insightProps)
+    useEffect(()=>{
+
+        const getTradingInsights = async()=>{
+            try {
+                const res = await axiosGet(`/admin/transaction-counts?${filter}`,true)
+                setInsights(res)
+            } catch (error) {
+                toast.error('Error Occurred While Fetching Trading Insights')
+            }
+            finally{
+                setLoading(false)
+            }
+        }
+
+        getTradingInsights()
+
+    },[filter])
+    const handleFilter = (e:ChangeEvent<HTMLSelectElement>)=>{
+        setFilter(e.target.value)
+    }
+    if(loading) return null
   return (<div className="my-5 mx-11">
         <header className='flex items-center gap-5 mb-8'>
             <Link href={'/transactions'} className='px-2 py-2 text-gray-100 font-man-rope bg-[#1B1F3B] rounded-lg font-semibold text-lg'>
@@ -20,13 +57,13 @@ const page = () => {
                     Transaction Insights
                 </h4>
                 <div className='py-6'>
-                    <p className='mb-6 font-medium text-sm text-gray-400'>Users deposited <span className='text-error-red font-semibold'>28.4%</span> more than they withdrew</p>
+                    <p className='mb-6 font-medium text-sm text-gray-400'>Users deposited <span className='text-error-red font-semibold'>{insights?.deposit_vs_withdraw_percentage}</span> more than they withdrew</p>
                     <section>
                         <div className='flex gap-4 mb-5'>
                             <Image src={'/transactions/incoming.svg'} alt='' width={48} height={48} />
                             <div>
                                 <h2 className='text-[1vw] text-gray-400 font-medium'>Deposits</h2>
-                                <p className='text-black font-bold text-[1.9vw]'>$190,977,000.20</p>
+                                <p className='text-black font-bold text-[1.9vw]'>{insights?.total_deposited}</p>
                             </div>
                         </div>
                         <div className='py-4 px-3 bg-white-200 rounded-xl w-fit'>
@@ -34,7 +71,7 @@ const page = () => {
                                 Deposit Count
                             </h2>
                             <p className='text-black font-bold text-[1.9vw]'>
-                                300
+                                {insights?.deposit_count}
                             </p>
                         </div>
                     </section>
@@ -46,15 +83,15 @@ const page = () => {
                             <Image src={'/transactions/outgoing.svg'} alt='' width={48} height={48} />
                             <div>
                                 <h2 className='text-[1vw] text-gray-400 font-medium'>Withdrawals</h2>
-                                <p className='text-black font-bold text-[1.9vw]'>$25,977,000.20</p>
+                                <p className='text-black font-bold text-[1.9vw]'>{insights?.total_withdrawn}</p>
                             </div>
                         </div>
                         <div className='py-4 px-3 bg-white-200 rounded-xl w-fit'>
                             <h2 className='text-gray-400 text-[1vw] font-medium'>
-                                Deposit Count
+                                Withdrawal Count
                             </h2>
                             <p className='text-black font-bold text-[1.9vw]'>
-                                1014
+                                {insights?.withdraw_count}
                             </p>
                         </div>
                     </section>
@@ -65,7 +102,7 @@ const page = () => {
 
                 </div>
             </div>
-            <TransactionsChart />
+            <TransactionsChart handleFilter={handleFilter} insights={insights} />
         </main>
 
     </div>)

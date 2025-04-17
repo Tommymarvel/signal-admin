@@ -23,7 +23,7 @@ const Keyinsight = () => {
     },[])
   return (<>
   {
-    loading ? ( <div className="animate-pulse">
+    loading  ? ( <div className="animate-pulse">
         {/* Key Insights Skeleton */}
         <div className="grid grid-cols-4 gap-4 mb-6">
           {Array(4).fill(0).map((_, index) => (
@@ -37,10 +37,10 @@ const Keyinsight = () => {
         <div>
             <p className="mb-5 font-medium text-xs text-gray-400">This month’s metrics</p>
             <div className="flex justify-between items-center w-[90%]">
-                <Metric image="/dashboard/insight/totalTrx.svg" title="Total Transactions" value={`$${Number(insightData?.total_transactions.split(" ")[0]).toFixed(4)}`} />
-                <Metric image="/dashboard/insight/activeTrade.svg" title="Active Trades" value={`${insightData.active_trades}`} />
-                <Metric image="/dashboard/insight/newUser.svg" title="New User Registration" value={`${insightData.new_users_this_month}`} />
-                <Metric image="/dashboard/insight/totalUsers.svg" title="Total Users" value={`${insightData.total_users}`} />
+                <Metric image="/dashboard/insight/totalTrx.svg" title="Total Transactions" value={insightData.total_transactions && `$${Number(insightData?.total_transactions.split(" ")[0]).toFixed(4)}`} />
+                <Metric image="/dashboard/insight/activeTrade.svg" title="Active Trades" value={`${insightData?.active_trades}`} />
+                <Metric image="/dashboard/insight/newUser.svg" title="New User Registration" value={`${insightData?.new_users_this_month}`} />
+                <Metric image="/dashboard/insight/totalUsers.svg" title="Total Users" value={`${insightData?.total_users}`} />
             </div>
         </div>
     </div>)

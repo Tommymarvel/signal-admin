@@ -29,8 +29,6 @@ const TradeVolumeChart = () => {
       }
     }
     getVolumes()
-    
-    console.log('ran again')
   },[filter])
   const highestTrade = volumesData?.reduce((max, d) => (d.total_volume > max.total_volume ? d : max), volumesData[0]);
   const averageTrade = (volumesData?.reduce((sum, d) => sum + d.total_volume, 0) / volumesData.length).toFixed(2);

@@ -35,6 +35,7 @@ export function AuthProvider({ children }:{children : React.ReactNode | React.JS
         toast.error('Error occured, session expired',{autoClose : 2000})
         toast.warning('Redirecting to login',{autoClose : 2000})
         setTimeout(()=>{
+          console.log('about to redirect')
           router.push('/login')
         },2000)
       } finally {

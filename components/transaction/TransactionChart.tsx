@@ -1,6 +1,6 @@
 "use client";
-import { Field, Form, Formik } from "formik";
-import { useEffect, useState } from "react";
+import { insightProps } from "@/app/(main)/transactions/page";
+import { ChangeEvent, useEffect, useState } from "react";
 import { PieChart, Pie, Cell } from "recharts";
 
 const data = [
@@ -8,31 +8,27 @@ const data = [
   { name: "Withdrawals", value: 132, color: "#CF491E" },
 ];
 
-export default function TransactionsChart() {
+export default function TransactionsChart({insights, handleFilter}:{insights : insightProps, handleFilter : (e:ChangeEvent<HTMLSelectElement>)=> void}) {
   const [mounted, setMounted] = useState(false)
   useEffect(()=>{
     setMounted(true)
   },[])
-  const totalTransactions = data.reduce((acc, item) => acc + item.value, 0);
+  const formattedInsights = [
+    { name: "Deposits", value: insights.deposit_count, color: "#19C37D" },
+    { name: "Withdrawals", value: insights.withdraw_count, color: "#CF491E" },
+  ]
+  const totalTransactions = formattedInsights.reduce((acc, item) => acc + item.value, 0);
   if(!mounted) return null
   return (
     <div className="relative flex flex-col items-center">
       {/* PieChart Container */}
-      <Formik
-      initialValues={{filter : 'This Month'}}
-      onSubmit={()=>{
-
-      }}
-      >
-        <Form className="flex justify-end w-full mb-4">
-          <Field as='select' className='cursor-pointer outline-none p-3 rounded-lg border border-gray-100'>
-            <option value="This Month"> This Month</option>
-          </Field>
-        </Form>
-      </Formik>
+      <select onChange={handleFilter} className='cursor-pointer outline-none p-3 rounded-lg border border-gray-100'>
+        <option value={`month=${new Date().getMonth() + 1}`}> This Month</option>
+        <option value={new Date().getMonth() - 1 <= 0 ? `year=${new Date().getFullYear() - 1}&month=${(new Date().getMonth() - 1) + 12}` : `month=${new Date().getMonth() - 1}`}> 2 Months ago</option>
+      </select>
       <PieChart width={360} height={360}>
         <Pie
-          data={data}
+          data={formattedInsights}
           cx="50%"
           cy="50%"
           innerRadius={110}
@@ -41,7 +37,7 @@ export default function TransactionsChart() {
           dataKey="value"
           isAnimationActive={true}
         >
-          {data.map((entry, index) => (
+          {formattedInsights.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Pie>
@@ -55,7 +51,7 @@ export default function TransactionsChart() {
 
       {/* Legend */}
       <div className="flex justify-between w-full mt-10">
-        {data.map((item) => (
+        {formattedInsights.map((item) => (
           <div key={item.name} className="flex flex-col gap-2">
             <span className="w-[10.97vw] h-1" style={{ backgroundColor: item.color }}></span>
             <p>{item.name}</p>
