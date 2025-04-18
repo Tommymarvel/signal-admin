@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
+import { axiosPost } from '@/utils/api';
 
 // Generate time slots in increments of `interval` minutes for the next 30 minutes
 // starting from the next multiple of `interval`.
@@ -35,12 +37,13 @@ function generateTimeSlots(interval: number): string[] {
 interface NewTradeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  toggleRefresh : ()=> void
 }
 
-export default function NewTradeModal({ isOpen, onClose }: NewTradeModalProps) {
+export default function NewTradeModal({ isOpen, onClose, toggleRefresh }: NewTradeModalProps) {
   // Form states
   const [product, setProduct] = useState('BTC');
-  const [direction, setDirection] = useState('Call');
+  const [direction, setDirection] = useState('CALL');
   const [amount, setAmount] = useState('30');
 
   // Time Period & Trade Period
@@ -68,7 +71,7 @@ export default function NewTradeModal({ isOpen, onClose }: NewTradeModalProps) {
   if (!isOpen) return null;
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     // Your "Set Trade Order" logic
     console.log({
@@ -79,7 +82,24 @@ export default function NewTradeModal({ isOpen, onClose }: NewTradeModalProps) {
       tradePeriod,
       tradingFee,
     });
-    onClose();
+
+    try {
+      const data = {
+        symbol : product,
+        side : direction,
+        price : Number(amount),
+        time_period : timePeriod,
+        trade_period : tradePeriod
+      }
+      await axiosPost(`/admin/trade/create`,data,true)
+      toggleRefresh()
+      onClose();
+      toast.success("Trade Created Successfully")
+    } catch (error) {
+      console.log(error)
+      toast.error("An error occurred while creating trade")
+    }
+    
   };
 
   return (
@@ -113,9 +133,9 @@ export default function NewTradeModal({ isOpen, onClose }: NewTradeModalProps) {
               onChange={(e) => setProduct(e.target.value)}
               className="rounded-md border border-gray-300 py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
-              <option value="BTC">BTC</option>
-              <option value="ETH">ETH</option>
-              <option value="SOL">SOL</option>
+              <option value="BTC/USDT">BTC/USDT</option>
+              <option value="ETH/USDT">ETH/USDT</option>
+              <option value="SOL/USDT">SOL/USDT</option>
             </select>
           </div>
 
@@ -131,8 +151,8 @@ export default function NewTradeModal({ isOpen, onClose }: NewTradeModalProps) {
                 onChange={(e) => setDirection(e.target.value)}
                 className="rounded-md border border-gray-300 py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
-                <option value="Call">Call</option>
-                <option value="Put">Put</option>
+                <option value="CALL">Call</option>
+                <option value="PUT">Put</option>
               </select>
             </div>
 

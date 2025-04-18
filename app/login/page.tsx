@@ -33,7 +33,13 @@ const page = () => {
           })
           toast.warning('Redirecting to dashboard...',{autoClose : 2000})
           setTimeout(()=>{
-            router.push('/')
+            const lastLocation = localStorage.getItem('sig_lastKnown_location')
+            if(lastLocation){
+              router.push(lastLocation)
+            }else{
+              router.push('/')
+            }
+            
           },2000)
           setLoading(false)
         } catch (error) {

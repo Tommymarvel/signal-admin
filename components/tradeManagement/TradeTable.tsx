@@ -24,6 +24,7 @@ export default function TradesTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refresh, setRefresh] = useState(false)
 
   const tradesPerPage = 10;
 
@@ -40,7 +41,7 @@ export default function TradesTable() {
       }
     }
     getTrades()
-  },[])
+  },[refresh])
 
   // Filter trades by search
   const filteredTrades = trades.filter((trade) => {
@@ -71,6 +72,8 @@ export default function TradesTable() {
     if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
   };
+
+  const toggleRefresh = ()=> setRefresh(!refresh)
 
   return (
     <div className="p-6 bg-white rounded-lg font-inter">
@@ -217,6 +220,7 @@ export default function TradesTable() {
         </div>
       </div>
       <NewTradeModal
+       toggleRefresh={toggleRefresh}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

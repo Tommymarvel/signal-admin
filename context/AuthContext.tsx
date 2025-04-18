@@ -1,7 +1,7 @@
 'use client';
 import { axiosGet, axiosPost } from '@/utils/api';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useState, useEffect, useContext } from 'react';
 import { toast } from 'react-toastify';
 
@@ -24,14 +24,17 @@ export function AuthProvider({ children }:{children : React.ReactNode | React.JS
   const [user, setUser] = useState<userProps | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        localStorage.removeItem('sig_lastKnown_location')
         const res = await axiosGet('/auth/admin/me',true);
         setUser(res)
       } catch (err) {
         setUser(null);
+        localStorage.setItem('sig_lastKnown_location',pathname)
         toast.error('Error occured, session expired',{autoClose : 2000})
         toast.warning('Redirecting to login',{autoClose : 2000})
         setTimeout(()=>{
