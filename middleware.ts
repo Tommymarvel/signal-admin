@@ -20,22 +20,22 @@ function protectedMiddleware(req: NextRequest){
 
   return NextResponse.next();
 }
-function logoutMiddleware(req: NextRequest) {
-  if (req.nextUrl.pathname === '/logout') {
-    const response = NextResponse.redirect(new URL('/login', req.url));
+// function logoutMiddleware(req: NextRequest) {
+//   if (req.nextUrl.pathname === '/logout') {
+//     const response = NextResponse.redirect(new URL('/login', req.url));
 
-    // Clear the cookie
-    response.cookies.set('authToken', '', {
-      httpOnly: true,
-      expires: new Date(0),
-      path: '/',
-    });
+//     // Clear the cookie
+//     response.cookies.set('authToken', '', {
+//       httpOnly: true,
+//       expires: new Date(0),
+//       path: '/',
+//     });
 
-    return response;
-  }
+//     return response;
+//   }
 
-  return NextResponse.next();
-}
+//   return NextResponse.next();
+// }
 
 export function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
@@ -44,9 +44,9 @@ export function middleware(req: NextRequest) {
     response = mobileRedirectMiddleware(req) || response;
   }
 
-  if (pathname == "/logout") {
-    response = logoutMiddleware(req) || response;
-  }
+  // if (pathname == "/logout") {
+  //   response = logoutMiddleware(req) || response;
+  // }
 
   if(protectedRoutes.includes(pathname)){
     
