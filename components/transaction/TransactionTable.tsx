@@ -135,7 +135,7 @@ const TransactionTable = () => {
     if (selectAll) {
         setSelectedTrx([]);
     } else {
-        setSelectedTrx(trxs.map((trx) => trx.transactionId));
+        setSelectedTrx(trxs.map((trx) => String(trx.id)));
     }
     setSelectAll(!selectAll);
   };
@@ -158,7 +158,7 @@ const TransactionTable = () => {
   const toggleSelectTrx = (id : string) => {
     setSelectedTrx((prevSelected) =>
       prevSelected.includes(id)
-        ? prevSelected.filter((userId) => userId !== id)
+        ? prevSelected.filter((trxId) => trxId !== id)
         : [...prevSelected, id]
     );
   };

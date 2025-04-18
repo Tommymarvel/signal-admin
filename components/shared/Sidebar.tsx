@@ -1,16 +1,12 @@
 'use client'
 import Image from "next/image";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import NavLink from "./NavLink";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 
 const Sidebar = () => {
   const [sidebarWidth, setSidebarWidth] = useState(272);
   const [isClient, setIsClient] = useState(false); // Default width
   const [openSubMenu, setOpenSubMenu] = useState(false)
-  const router = useRouter()
   useEffect(() => {
     setIsClient(true); // Set true once component mounts
     if(window.innerWidth > 1024){
@@ -41,16 +37,6 @@ const Sidebar = () => {
       document.addEventListener("mouseup", handleMouseUp);
   };
 
-  const handleLogOut = async(e:ChangeEvent<HTMLAnchorElement>)=>{
-    e.preventDefault()
-    try {
-      await axios.get(`/api/auth/logout`)
-      toast.warning('Redirecting to Login Page')
-      router.push('/login')
-    } catch (error) {
-      toast.error('An Error Occurred while performing user action, Please try again later')
-    }
-  }
 
   if (!isClient) return null;
   return (
