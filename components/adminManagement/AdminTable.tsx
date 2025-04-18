@@ -53,7 +53,7 @@ export default function AdminTable({loading, adminData, adminTools, toggleRefres
           {adminData.length === 0 && (
             <tr>
               <td colSpan={8} className="p-3 text-center text-gray-400">
-                No trades found.
+                No Admin found.
               </td>
             </tr>
           )}
