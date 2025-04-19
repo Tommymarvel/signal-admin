@@ -14,7 +14,7 @@ export const axiosGet = async (endpoint:string, withAuth ?: boolean) => {
                 Authorization: `Bearer ${token}`,
             };
         }
-        const res = await axios.get(`${base_url}${endpoint}`, { headers, withCredentials: withAuth });
+        const res = await axios.get(`${base_url}${endpoint}`, { headers, timeout : 120000});
       
         return res.data;
     } catch (error) {
@@ -39,7 +39,7 @@ export const axiosPost = async (endpoint:string, data?: object, withAuth ?: bool
             };
 
         }
-        const res = await axios.post(`${base_url}${endpoint}`,data,{ headers, withCredentials: withAuth });
+        const res = await axios.post(`${base_url}${endpoint}`,data,{ headers});
     
         return res;
             

@@ -8,13 +8,14 @@ import { toast } from 'react-toastify';
 interface Trade {
   id: number;
   tid: string;
-  trading_pair: string;
-  order_direction: 'PUT' | 'CALL';
+  symbol: string;
+  side: 'PUT' | 'CALL';
   price: string;
-  followed: number;
+  followers: number;
   totalValue: number;
   status: 'active' | 'failed' | 'completed' | 'pending';
 }
+
 
 
 export default function TradesTable() {
@@ -32,9 +33,11 @@ export default function TradesTable() {
     const getTrades = async()=>{
       try {
         setLoading(true)
-        const res = await axiosGet(`/admin/trade-calls`,true)
-        setTrades(res.trade_calls)
+        const res = await axiosGet(`/admin/trades`,true)
+        console.log(res.trades)
+        setTrades(res.trades)
       } catch (error) {
+        console.log(error)
         toast.error('Error occurred while fetching trade data')
       }finally{
         setLoading(false)
@@ -49,7 +52,7 @@ export default function TradesTable() {
     return (
       trade.tid?.toLowerCase().includes(lowerSearch) ||
       String(trade.id)?.toLowerCase().includes(lowerSearch) ||
-      trade.trading_pair?.toLowerCase().includes(lowerSearch)
+      trade.symbol?.toLowerCase().includes(lowerSearch)
     );
   });
 
@@ -143,10 +146,10 @@ export default function TradesTable() {
             return (
               <tr key={trade.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
                 <td className="p-3">{trade.tid || "N/A"}</td>
-                <td className="p-3">{trade.trading_pair}</td>
-                <td className="p-3">{trade.order_direction}</td>
+                <td className="p-3">{trade.symbol}</td>
+                <td className="p-3">{trade.side}</td>
                 <td className="p-3">{trade?.price?.toLocaleString() || "N/A"}</td>
-                <td className="p-3">{trade?.followed || "N/A"}</td>
+                <td className="p-3">{trade?.followers || "N/A"}</td>
                 <td className="p-3">{trade?.totalValue?.toLocaleString() || "N/A"}</td>
                 <td className={`p-3 font-medium capitalize ${statusColor}`}>
                   {trade.status}
