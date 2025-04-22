@@ -23,7 +23,7 @@ export async function POST(req:NextRequest) {
     });
     return response;
   } catch (error) {
-    return NextResponse.json({message : 'Invalid credentials'}, { status: 401 });
+    return NextResponse.json({message : 'Invalid credentials', error}, { status: 401 });
   }
   
 }
