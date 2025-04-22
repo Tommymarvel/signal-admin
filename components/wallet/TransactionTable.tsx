@@ -3,7 +3,6 @@ import { axiosGet } from "@/utils/api";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import TrxDropDown from "./TrxDropDown";
 
 
 interface trrxProps{
@@ -28,11 +27,8 @@ const TransactionTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [trxs, setTrxs] = useState<trrxProps[]>([])
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false)
-  const [refresh, setRefresh] = useState(false)
+  const [loading, setLoading] = useState(true)
   const trxsPerPage = 5;
-
-  const toggleRefresh = ()=> setRefresh(!refresh)
 
   const toggleSelectAll = () => {
     if (selectAll) {
@@ -46,8 +42,7 @@ const TransactionTable = () => {
   useEffect(()=>{
     const getAllTrx = async()=>{
       try {
-        setLoading(true)
-        const res = await axiosGet(`/admin/withdraw-requests`,true)
+        const res = await axiosGet(`/admin/transactions`,true)
         setTrxs(res.transactions)
       } catch (error) {
         toast.error('Unable to fetch Transaction data')
@@ -74,7 +69,7 @@ const TransactionTable = () => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // reset to first page when searching
   };
-  const filteredTrx = trxs?.filter((trx) => {
+  const filteredTrx = trxs.filter((trx) => {
     const lowerSearch = searchTerm.toLowerCase();
     return (
       trx.currency?.toLowerCase().includes(lowerSearch) ||
@@ -115,7 +110,6 @@ const TransactionTable = () => {
               <th className="p-3">Amount ($) </th>
               <th className="p-3">Date & Time</th>
               <th className="p-3">Status</th>
-              <th className="p-3"></th>
             </tr>
             </thead>
             <tbody>
@@ -143,13 +137,11 @@ const TransactionTable = () => {
               <td className="p-3">{trx.amount}</td>
               <td className="p-3">{new Date(trx?.created_at).toLocaleString()}</td>
               <td className={`p-3 ${trx.status == "completed" ? "text-green-500" : "text-red-500"}`}>{trx.status}</td>
-              <td className="p-3"><TrxDropDown toggleRefresh={toggleRefresh} trxId={trx.id} /></td>
               </tr>
             ))}
             </tbody>
         </table>
-        {
-          (trxs && trxs.length > 1) ? (<div className="flex justify-between items-center mt-4">
+        <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-600">1-5 of {trxs?.length} users</p>
             <div className="flex space-x-2">
             {[...Array(Math.ceil(trxs?.length / trxsPerPage)).keys()].map((number) => (
@@ -170,9 +162,7 @@ const TransactionTable = () => {
                     Next
                 </button>
             </div>
-        </div>) : (<div className="text-center my-4">No Transactions found</div>)
-        }
-        
+        </div>
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
 'use client'
-import TransactionTable from '@/components/transaction/TransactionTable'
+import TransactionTable from '@/components/wallet/TransactionTable'
 import { axiosGet } from '@/utils/api'
 import React, { useEffect, useState } from 'react'
 
