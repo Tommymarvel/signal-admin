@@ -4,6 +4,7 @@ import Image from 'next/image';
 import NewTradeModal from './modal/NewTradeModal';
 import { axiosGet } from '@/utils/api';
 import { toast } from 'react-toastify';
+import TradeDropDown from './TradeDropDown';
 
 interface Trade {
   id: number;
@@ -13,7 +14,7 @@ interface Trade {
   price: string;
   followers: number;
   totalValue: number;
-  status: 'active' | 'failed' | 'completed' | 'pending';
+  status: 'FILLED' | 'CANCELLED' | 'PARTIALLY_FILLED' | 'NEW';
 }
 
 
@@ -136,16 +137,16 @@ export default function TradesTable() {
           currentTrades.map((trade) => {
             // Color-coding statuses
             let statusColor = 'text-gray-500';
-            if (trade.status == 'active') statusColor = 'text-green-500';
-            else if (trade.status == 'failed') statusColor = 'text-red-500';
-            else if (trade.status == 'completed')
+            if (trade.status == 'NEW') statusColor = 'text-green-500';
+            else if (trade.status == 'CANCELLED') statusColor = 'text-red-500';
+            else if (trade.status == 'FILLED')
               statusColor = 'text-gray-700';
-            else if (trade.status == 'pending')
+            else if (trade.status == 'PARTIALLY_FILLED')
               statusColor = 'text-yellow-500';
 
             return (
               <tr key={trade.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
-                <td className="p-3">{trade.tid || "N/A"}</td>
+                <td className="p-3">{trade.tid || trade.id || "N/A"}</td>
                 <td className="p-3">{trade.symbol}</td>
                 <td className="p-3">{trade.side}</td>
                 <td className="p-3">{trade?.price?.toLocaleString() || "N/A"}</td>
@@ -155,12 +156,7 @@ export default function TradesTable() {
                   {trade.status}
                 </td>
                 <td className="p-3">
-                  <Image
-                    src="/umanage/more.svg"
-                    alt="more"
-                    width={24}
-                    height={24}
-                  />
+                  <TradeDropDown toggleRefresh={toggleRefresh} tradeId={trade.id} />
                 </td>
               </tr>
             );
