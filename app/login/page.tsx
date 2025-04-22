@@ -44,6 +44,7 @@ const page = () => {
           setLoading(false)
         } catch (error) {
           if(error instanceof AxiosError){
+            console.log(error)
             toast.update('signin',{render: error.response?.data.message,
               type: 'error',
               isLoading: false,
