@@ -3,8 +3,9 @@ import { axiosPost } from "@/utils/api";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
+import { Trade } from "./TradeTable";
 
-export default function TradeDropDown({tradeId, toggleRefresh}:{tradeId : string | number, toggleRefresh : ()=>void}) {
+export default function TradeDropDown({tradeId, toggleRefresh, tradeData}:{tradeId : string | number, toggleRefresh : ()=>void, tradeData : Trade}) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

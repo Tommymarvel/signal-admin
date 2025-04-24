@@ -6,7 +6,7 @@ import { axiosGet } from '@/utils/api';
 import { toast } from 'react-toastify';
 import TradeDropDown from './TradeDropDown';
 
-interface Trade {
+export interface Trade {
   id: number;
   tid: string;
   symbol: string;
@@ -156,7 +156,7 @@ export default function TradesTable() {
                   {trade.status}
                 </td>
                 <td className="p-3">
-                  <TradeDropDown toggleRefresh={toggleRefresh} tradeId={trade.id} />
+                  <TradeDropDown toggleRefresh={toggleRefresh} tradeData={trade} tradeId={trade.id} />
                 </td>
               </tr>
             );

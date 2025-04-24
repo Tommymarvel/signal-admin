@@ -23,7 +23,7 @@ const page = () => {
 
     const handleSuspendUser = async(user_id : string|number|undefined)=>{
         try {
-          const confirm = window.confirm("Are you sure you want to take delete this Admin")
+          const confirm = window.confirm("Are you sure you want to suspend this user")
     
           if(confirm){
             await axiosPost('/admin/user/ban',{user_id},true)

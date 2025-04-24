@@ -18,23 +18,23 @@ const Sidebar = () => {
   }
   
   const handleMouseDown = (event: React.MouseEvent) => {
-      event.preventDefault();
-      
-      const startX = event.clientX;
-      const startWidth = sidebarWidth;
+    event.preventDefault();
+    
+    const startX = event.clientX;
+    const startWidth = sidebarWidth;
 
-      const handleMouseMove = (moveEvent: MouseEvent) => {
-      const newWidth = startWidth + (moveEvent.clientX - startX);
-      setSidebarWidth(Math.max(250, Math.min(newWidth, 350))); // Min 250px, Max 350px
-      };
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+    const newWidth = startWidth + (moveEvent.clientX - startX);
+    setSidebarWidth(Math.max(250, Math.min(newWidth, 350))); // Min 250px, Max 350px
+    };
 
-      const handleMouseUp = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      };
+    const handleMouseUp = () => {
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+    };
 
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
 
@@ -68,6 +68,9 @@ const Sidebar = () => {
                <FeesSvg/>
               </NavLink>
               <NavLink to='/adminManagement' text="Admin Management">
+               <HashSvg/>
+              </NavLink>
+              <NavLink to='/kycs' text="Kyc Requests">
                <HashSvg/>
               </NavLink>
             </div>

@@ -2,7 +2,6 @@
 import { useAuth } from "@/context/AuthContext"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
 const Navbar = () => {
@@ -14,7 +13,8 @@ const Navbar = () => {
     '/tradeManagement' : 'Trade Management',
     '/wallet' : 'Wallet',
     '/transactions' : 'Transactions',
-    '/adminManagement' : 'Admin Management'
+    '/adminManagement' : 'Admin Management',
+    'kycs' : 'KYC Requests'
   }
 
   const pathname = usePathname()

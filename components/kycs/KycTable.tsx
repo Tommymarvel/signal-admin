@@ -1,24 +1,53 @@
 "use client"
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import UserDropDown from "./UserDropDown";
 import { axiosGet } from "@/utils/api";
 import { toast } from "react-toastify";
+import KycDropDown from "./KycDropDown";
 
 
-const UserTable = () => {
+interface kycProps { 
+  "id": number,
+  "user_id": number,
+  "first_name": string,
+  "last_name": string,
+  "country": string,
+  "id_type": string,
+  "id_number": string,
+  "status": string,
+  "created_at": string,
+  "updated_at": string ,
+  "user": {
+    "id": number,
+    "name": string | null,
+    "email": string | null
+  }
+}
+
+const KycTable = () => {
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [userList, setUserList] = useState<userDetailProps[]>([])
-  const usersPerPage = 5;
+  const [kycList, setKycList] = useState<kycProps[]>([])
+  const kycsPerPage = 10;
+
+
+  const filteredKycs = kycList.filter((kycs) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return (
+      kycs.status?.toLowerCase().includes(lowerSearch) ||
+      String(kycs.id)?.toLowerCase().includes(lowerSearch) ||
+      kycs.user.email?.toLowerCase().includes(lowerSearch) ||
+      kycs.user.name?.toLowerCase().includes(lowerSearch)
+    );
+  });
 
   const toggleSelectAll = () => {
     if (selectAll) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(userList.map((user) => user.id));
+      setSelectedUsers(filteredKycs.map((kyc) => kyc.id));
     }
     setSelectAll(!selectAll);
   };
@@ -26,22 +55,13 @@ const UserTable = () => {
   const toggleSelectUser = (id : number) => {
     setSelectedUsers((prevSelected) =>
       prevSelected.includes(id)
-        ? prevSelected.filter((userId) => userId !== id)
+        ? prevSelected.filter((kycId) => kycId !== id)
         : [...prevSelected, id]
     );
   };
-
-  const filteredUsers = userList.filter((users) => {
-    const lowerSearch = searchTerm.toLowerCase();
-    return (
-      users.name?.toLowerCase().includes(lowerSearch) ||
-      String(users.id)?.toLowerCase().includes(lowerSearch) ||
-      users.email?.toLowerCase().includes(lowerSearch)
-    );
-  });
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const indexOfLastKyc = currentPage * kycsPerPage;
+  const indexOfFirstKyc = indexOfLastKyc - kycsPerPage;
+  const currentKycs = filteredKycs.slice(indexOfFirstKyc, indexOfLastKyc);
 
   const paginate = (pageNumber : number) => setCurrentPage(pageNumber);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,20 +69,23 @@ const UserTable = () => {
     setCurrentPage(1); // reset to first page when searching
   };
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [refresh, setRefresh] = useState(false)
+  const toggleRefresh = ()=> setRefresh(!refresh)
   useEffect(()=>{
-    const getUsers = async()=>{
+    const getKycRequests = async()=>{
       try {
-        const res = await axiosGet('/admin/users',true)
-        setUserList(res.users)
+        setLoading(true)
+        const res = await axiosGet('/admin/kyc-requests',true)
+        setKycList(res.kyc_requests)
       } catch (error) {
         toast.error('Error occured while fetching users data')
       }finally{
         setLoading(false)
       }
     }
-    getUsers()
-  },[])
+    getKycRequests()
+  },[refresh])
 
   return (
     <div className="p-6 bg-white rounded-lg ">
@@ -94,10 +117,11 @@ const UserTable = () => {
             </th>
             <th className="p-3">Name</th>
             <th className="p-3">Email Address</th>
-            <th className="p-3">Phone</th>
-            <th className="p-3">Date Joined</th>
+            <th className="p-3">Id Type</th>
+            <th className="p-3">Id Number</th>
+            <th className="p-3">Country</th>
+            <th className="p-3">Date Created</th>
             <th className="p-3">KYC Status</th>
-            <th className="p-3">Status</th>
             <th className="p-3"></th>
           </tr>
         </thead>
@@ -111,31 +135,32 @@ const UserTable = () => {
                   </td>
                 </tr>
               ))}
-            </>) : currentUsers.map((user) => (
-            <tr key={user.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
+            </>) : currentKycs.map((kyc) => (
+            <tr key={kyc.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
               <td className="p-3">
                 <input
                   type="checkbox"
-                  checked={selectedUsers.includes(user.id)}
-                  onChange={() => toggleSelectUser(user.id)}
+                  checked={selectedUsers.includes(kyc.id)}
+                  onChange={() => toggleSelectUser(kyc.id)}
                 />
               </td>
-              <td className="p-3 capitalize">{user?.name || "N/A"}</td>
-              <td className="p-3">{user?.email || "N/A"}</td>
-              <td className="p-3">{user?.phone_number || "N/A"}</td>
-              <td className="p-3">{user?.date_joined || "N/A"}</td>
-              <td className="p-3 text-blue-500">{user.kyc_status}</td>
-              <td className={`p-3 ${user.status === 'Active' ? "text-green-500" : "text-red-500"}`}>{user.status === 'Inactive' ? 'Inactive' : "Active"}</td>
-              <td className="p-3 text-blue-500"><UserDropDown userId={user.uid}/></td>
+              <td className="p-3 capitalize">{kyc.user.name || "N/A"}</td>
+              <td className="p-3">{kyc.user.email || "N/A"}</td>
+              <td className="p-3 capitalize">{kyc.id_type || "N/A"}</td>
+              <td className="p-3 ">{kyc.id_number || "N/A"}</td>
+              <td className="p-3 ">{kyc.country}</td>
+              <td className="p-3 capitalize">{new Date(kyc.created_at).toLocaleDateString()}</td>
+              <td className={`p-3 capitalize ${kyc.status == 'verified' ? "text-green-500" : "text-red-500"}`}>{kyc.status}</td>
+              <td className="p-3 text-blue-500"><KycDropDown toggleRefresh={toggleRefresh} kycId={kyc.id}/></td>
             </tr>
           ))}
 
         </tbody>
       </table>
       <div className="flex justify-between items-center mt-4">
-        <p className="text-sm text-gray-600">1-5 of {filteredUsers.length} users</p>
+        <p className="text-sm text-gray-600">1-5 of {filteredKycs.length} users</p>
         <div className="flex space-x-2">
-          {[...Array(Math.ceil(filteredUsers.length / usersPerPage)).keys()].map((number) => (
+          {[...Array(Math.ceil(filteredKycs.length / kycsPerPage)).keys()].map((number) => (
             <button
               key={number + 1}
               onClick={() => paginate(number + 1)}
@@ -158,4 +183,4 @@ const UserTable = () => {
   );
 };
 
-export default UserTable;
+export default KycTable;
