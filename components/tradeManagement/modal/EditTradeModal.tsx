@@ -43,7 +43,7 @@ export default function EditTradeModal({ isOpen, onClose, toggleRefresh, tradeDa
       console.log(res)
       toggleRefresh()
       onClose();
-      toast.success("Trade Created Successfully")
+      toast.success("Trade Updated Successfully")
     } catch (error) {
       console.log(error)
       toast.error("An error occurred while creating trade")
