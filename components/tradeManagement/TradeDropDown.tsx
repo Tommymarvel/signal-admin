@@ -4,11 +4,14 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Trade } from "./TradeTable";
+import EditTradeModal from "./modal/EditTradeModal";
 
 export default function TradeDropDown({tradeId, toggleRefresh, tradeData}:{tradeId : string | number, toggleRefresh : ()=>void, tradeData : Trade}) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openEditTrade, setOpenEditTrade] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const toggleEditTrade = ()=> setOpenEditTrade(!openEditTrade)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -25,6 +28,10 @@ export default function TradeDropDown({tradeId, toggleRefresh, tradeData}:{trade
     const confirm = window.confirm(`Are you sure you want to toggle status to ${status}`)
     if(confirm){
       try {
+        if(status == 'FILLED'){
+          toggleEditTrade()
+          return
+        }
         const data = {
           "trade_id" : tradeId,
           "status" : status
@@ -70,6 +77,7 @@ export default function TradeDropDown({tradeId, toggleRefresh, tradeData}:{trade
           </div>
         </div>
       )}
+      <EditTradeModal tradeData={tradeData} isOpen={openEditTrade} onClose={toggleEditTrade} toggleRefresh={toggleRefresh} />
     </div>
   );
 }

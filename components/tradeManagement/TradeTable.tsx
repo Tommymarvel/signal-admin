@@ -15,6 +15,12 @@ export interface Trade {
   followers: number;
   totalValue: number;
   status: 'FILLED' | 'CANCELLED' | 'PARTIALLY_FILLED' | 'NEW';
+  time_period : string;
+  trade_period : string;
+  open_price : string | number;
+  settlement_price : string | number;
+  open_position_time : string;
+  rate_of_return : number;
 }
 
 
@@ -35,7 +41,6 @@ export default function TradesTable() {
       try {
         setLoading(true)
         const res = await axiosGet(`/admin/trades`,true)
-        console.log(res.trades)
         setTrades(res.trades)
       } catch (error) {
         console.log(error)
