@@ -18,7 +18,7 @@ export interface insightProps {
 
 const page = () => {
     const [loading,setLoading] = useState(true)
-    const [filter,setFilter] = useState(`mpnth=${new Date().getMonth() + 1}`)
+    const [filter,setFilter] = useState(`month=${new Date().getMonth() + 1}`)
     const [insights, setInsights] = useState<insightProps>({} as insightProps)
     useEffect(()=>{
 

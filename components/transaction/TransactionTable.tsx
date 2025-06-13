@@ -170,7 +170,7 @@ const TransactionTable = () => {
                     Next
                 </button>
             </div>
-        </div>) : (<div className="text-center my-4">No Transactions found</div>)
+        </div>) : (<div className="text-center my-4">No Withdrawal Requests found</div>)
         }
         
       </main>
