@@ -54,7 +54,7 @@ const Sidebar = () => {
           </NavLink>
           <div className="mt-5 mb-auto">
             <p className="flex items-center justify-between cursor-pointer px-5 text-gray-400 font-semibold text-[1.2vw] mb-2" onClick={toggleSubMenu}>PLATFORM<Image src={`/dashboard/arrow-up.svg`} className={`transition-all ease-in-out duration-300 ${!openSubMenu && 'rotate-180'}`} alt="" width={16} height={16}/></p>
-            <div className={`max-h-0 overflow-hidden transition-all duration-300 ${openSubMenu && 'max-h-72'}`}>
+            <div className={`max-h-0 overflow-hidden transition-all duration-300 ${openSubMenu && 'max-h-96'}`}>
               <NavLink to='/userManagement' text="User Management">
                 <UserManageSvg/>
               </NavLink>
