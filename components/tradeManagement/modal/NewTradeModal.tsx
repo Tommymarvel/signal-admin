@@ -52,6 +52,7 @@ export default function NewTradeModal({ isOpen, onClose, toggleRefresh }: NewTra
 
   // Trading Fee
   const [tradingFee, setTradingFee] = useState('HoldPortfolio');
+  const [loading, setLoading] = useState(false)
 
   // Generate new time slots whenever `timePeriod` changes
   useEffect(() => {
@@ -74,6 +75,7 @@ export default function NewTradeModal({ isOpen, onClose, toggleRefresh }: NewTra
     e.preventDefault();
 
     try {
+      setLoading(true)
       const data = {
         symbol : product,
         side : direction,
@@ -85,8 +87,10 @@ export default function NewTradeModal({ isOpen, onClose, toggleRefresh }: NewTra
       toggleRefresh()
       onClose();
       toast.success("Trade Created Successfully")
+      setLoading(false)
     } catch (error) {
       console.log(error)
+      setLoading(false)
       toast.error("An error occurred while creating trade")
     }
     
@@ -213,17 +217,18 @@ export default function NewTradeModal({ isOpen, onClose, toggleRefresh }: NewTra
           </div>
 
           {/* Action Buttons */}
-          <div className="flex w-full  justify-between gap-3 pt-4">
+          <div className="flex w-full justify-between gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 w-1/2 border border-gray-300 rounded-md hover:bg-gray-100"
+              className="px-4 py-2 text-gray-600 w-1/2 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white w-1/2 bg-black rounded-md hover:bg-gray-900"
+              disabled={loading}
+              className="px-4 py-2 text-white w-1/2 bg-black rounded-md hover:bg-gray-900 cursor-pointer disabled:cursor-not-allowed"
             >
               Set Trade Order
             </button>

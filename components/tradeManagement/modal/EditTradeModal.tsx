@@ -22,6 +22,7 @@ export default function EditTradeModal({ isOpen, onClose, toggleRefresh, tradeDa
   const [openPrice, setOpenPrice] = useState<number>(Number(tradeData.open_price) || 0);
   const [settlementPrice, setSettlementPrice] = useState<number>(Number(tradeData.settlement_price) ||0);
   const [ror, setRor] = useState(Number(tradeData.rate_of_return) || 0);
+  const [loading, setLoading] = useState(false)
 
   // If modal is not open, don't render anything
   if (!isOpen) return null;
@@ -30,6 +31,7 @@ export default function EditTradeModal({ isOpen, onClose, toggleRefresh, tradeDa
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setLoading(true)
       const data = {
         "trade_id" : tradeData.id,
         "status" : 'FILLED',
@@ -39,13 +41,14 @@ export default function EditTradeModal({ isOpen, onClose, toggleRefresh, tradeDa
         settlement_price : settlementPrice,
         open_price : openPrice
       }
-      const res = await axiosPost('/admin/edit-trade',data,true)
-      console.log(res)
+      await axiosPost('/admin/edit-trade',data,true)
       toggleRefresh()
       onClose();
       toast.success("Trade Updated Successfully")
+      setLoading(false)
     } catch (error) {
       console.log(error)
+      setLoading(false)
       toast.error("An error occurred while creating trade")
     }
     
@@ -169,13 +172,14 @@ export default function EditTradeModal({ isOpen, onClose, toggleRefresh, tradeDa
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 w-1/2 border border-gray-300 rounded-md hover:bg-gray-100"
+              className="px-4 py-2 text-gray-600 w-1/2 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white w-1/2 bg-black rounded-md hover:bg-gray-900"
+              disabled={loading}
+              className="px-4 py-2 text-white w-1/2 bg-black rounded-md hover:bg-gray-900 cursor-pointer disabled:cursor-not-allowed"
             >
               Update Trade Order
             </button>
