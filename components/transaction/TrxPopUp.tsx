@@ -42,6 +42,7 @@ export default function TrxPopUp({ isOpen, onClose }: TrxPopUpProps) {
         onSubmit={async(values)=>{
           try {
             await axios.post('https://deposit-address-microservice.onrender.com/fundpolling',values)
+            toast.success('Funds Transferred Successfully')
           } catch (error) {
             toast.error('An error occurred while Processing Withdrawal')
           }
