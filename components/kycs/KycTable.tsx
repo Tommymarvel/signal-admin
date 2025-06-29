@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { axiosGet } from "@/utils/api";
 import { toast } from "react-toastify";
 import KycDropDown from "./KycDropDown";
+import Link from "next/link";
 
 
 interface kycProps { 
@@ -17,6 +18,7 @@ interface kycProps {
   "status": string,
   "created_at": string,
   "updated_at": string ,
+  document_path : string,
   "user": {
     "id": number,
     "name": string | null,
@@ -119,6 +121,7 @@ const KycTable = () => {
             <th className="p-3">Email Address</th>
             <th className="p-3">Id Type</th>
             <th className="p-3">Id Number</th>
+            <th className="p-3">Id Document</th>
             <th className="p-3">Country</th>
             <th className="p-3">Date Created</th>
             <th className="p-3">KYC Status</th>
@@ -130,7 +133,7 @@ const KycTable = () => {
             <>
               {[...Array(5)].map((_, index) => ( // Generate 5 skeleton rows
                 <tr key={index} className="animate-pulse border-gray-100">
-                  <td colSpan={8} className="p-3">
+                  <td colSpan={9} className="p-3">
                     <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
                   </td>
                 </tr>
@@ -148,6 +151,11 @@ const KycTable = () => {
               <td className="p-3">{kyc.user.email || "N/A"}</td>
               <td className="p-3 capitalize">{kyc.id_type || "N/A"}</td>
               <td className="p-3 ">{kyc.id_number || "N/A"}</td>
+              <td className="p-3 ">
+                <Link href={kyc.document_path ? kyc.document_path  : ''}  target={kyc.document_path && '_blank'} >
+                  {kyc.document_path ? 'Click here to view' : 'N/A'}
+                </Link>
+              </td>
               <td className="p-3 ">{kyc.country}</td>
               <td className="p-3 capitalize">{new Date(kyc.created_at).toLocaleDateString()}</td>
               <td className={`p-3 capitalize ${kyc.status == 'verified' ? "text-green-500" : "text-red-500"}`}>{kyc.status}</td>
