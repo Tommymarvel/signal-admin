@@ -41,10 +41,13 @@ export default function TrxPopUp({ isOpen, onClose }: TrxPopUpProps) {
         initialValues={{withdrawAddress : '', adminWithrawSecret: ''}}
         onSubmit={async(values)=>{
           try {
+            setLoading(true)
             await axios.post('https://deposit-address-microservice.onrender.com/fundpolling',values)
             toast.success('Funds Transferred Successfully')
+            setLoading(false)
           } catch (error) {
             toast.error('An error occurred while Processing Withdrawal')
+            setLoading(false)
           }
         }}
         >
@@ -76,7 +79,7 @@ export default function TrxPopUp({ isOpen, onClose }: TrxPopUpProps) {
                 disabled={loading}
                 className="px-4 py-2 text-white w-1/2 bg-black rounded-md hover:bg-gray-900 cursor-pointer disabled:cursor-not-allowed"
                 >
-                Withdraw
+                {loading ? "Withdrawing..." : 'Withdraw'}
                 </button>
             </div>
           </Form>
