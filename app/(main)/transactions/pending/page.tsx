@@ -1,6 +1,6 @@
+import PendingWithdrawalTable from '@/components/transaction/PendingWithdrawalTable';
 import Link from 'next/link';
 import React from 'react';
-import PendingWithdrawalTable from '@/components/transaction/PendingWithdrawalTable';
 
 const page = () => {
   return (
