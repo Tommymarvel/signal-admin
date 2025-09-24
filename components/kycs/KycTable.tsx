@@ -1,29 +1,28 @@
-"use client"
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
-import { axiosGet } from "@/utils/api";
-import { toast } from "react-toastify";
-import KycDropDown from "./KycDropDown";
-import Link from "next/link";
+'use client';
+import Image from 'next/image';
+import React, { useEffect, useState } from 'react';
+import { axiosGet } from '@/utils/api';
+import { toast } from 'react-toastify';
+import KycDropDown from './KycDropDown';
+import Link from 'next/link';
 
-
-interface kycProps { 
-  "id": number,
-  "user_id": number,
-  "first_name": string,
-  "last_name": string,
-  "country": string,
-  "id_type": string,
-  "id_number": string,
-  "status": string,
-  "created_at": string,
-  "updated_at": string ,
-  document_path : string,
-  "user": {
-    "id": number,
-    "name": string | null,
-    "email": string | null
-  }
+interface kycProps {
+  id: number;
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  country: string;
+  id_type: string;
+  id_number: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  document_path: string;
+  user: {
+    id: number;
+    name: string | null;
+    email: string | null;
+  };
 }
 
 const KycTable = () => {
@@ -31,36 +30,39 @@ const KycTable = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [kycList, setKycList] = useState<kycProps[]>([])
-  const [loading, setLoading] = useState(false)
-  const [refresh, setRefresh] = useState(false)
+  const [kycList, setKycList] = useState<kycProps[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [totalKycs, setTotalKycs] = useState(0);
   const [currentFrom, setCurrentFrom] = useState(1);
   const [currentTo, setCurrentTo] = useState(50);
   const kycsPerPage = 50;
 
-
-  const filteredKycs = Array.isArray(kycList) ? kycList.filter((kycs) => {
-    const lowerSearch = searchTerm.toLowerCase();
-    return (
-      kycs.status?.toLowerCase().includes(lowerSearch) ||
-      String(kycs.id)?.toLowerCase().includes(lowerSearch) ||
-      kycs.user.email?.toLowerCase().includes(lowerSearch) ||
-      kycs.user.name?.toLowerCase().includes(lowerSearch)
-    );
-  }) : [];
+  const filteredKycs = Array.isArray(kycList)
+    ? kycList.filter((kycs) => {
+        const lowerSearch = searchTerm.toLowerCase();
+        return (
+          kycs.status?.toLowerCase().includes(lowerSearch) ||
+          String(kycs.id)?.toLowerCase().includes(lowerSearch) ||
+          kycs.user.email?.toLowerCase().includes(lowerSearch) ||
+          kycs.user.name?.toLowerCase().includes(lowerSearch)
+        );
+      })
+    : [];
 
   const toggleSelectAll = () => {
     if (selectAll) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(Array.isArray(kycList) ? kycList.map((kyc) => kyc.id) : []);
+      setSelectedUsers(
+        Array.isArray(kycList) ? kycList.map((kyc) => kyc.id) : []
+      );
     }
     setSelectAll(!selectAll);
   };
 
-  const toggleSelectUser = (id : number) => {
+  const toggleSelectUser = (id: number) => {
     setSelectedUsers((prevSelected) =>
       prevSelected.includes(id)
         ? prevSelected.filter((kycId) => kycId !== id)
@@ -68,7 +70,7 @@ const KycTable = () => {
     );
   };
 
-  const paginate = (pageNumber : number) => {
+  const paginate = (pageNumber: number) => {
     setCurrentPage(pageNumber);
     setSearchTerm(''); // reset search when changing page
     setSelectedUsers([]); // reset selections
@@ -82,18 +84,21 @@ const KycTable = () => {
     setSelectAll(false);
   };
 
-  const toggleRefresh = ()=> setRefresh(!refresh)
-  useEffect(()=>{
-    const getKycRequests = async()=>{
+  const toggleRefresh = () => setRefresh(!refresh);
+  useEffect(() => {
+    const getKycRequests = async () => {
       try {
-        setLoading(true)
-        const res = await axiosGet(`/admin/kyc-requests?page=${currentPage}`,true)
-        console.log('KYC requests API response:', res)
-        
+        setLoading(true);
+        const res = await axiosGet(
+          `/admin/kyc-requests?page=${currentPage}`,
+          true
+        );
+        console.log('KYC requests API response:', res);
+
         // Handle different response structures
         let data: kycProps[] = [];
         let pagination: any = {};
-        
+
         if (res.kyc_requests) {
           // Standard response structure with kyc_requests key
           data = res.kyc_requests.data || [];
@@ -116,38 +121,44 @@ const KycTable = () => {
           data = [];
           pagination = { last_page: 1, total: 0, from: null, to: null };
         }
-        
+
         setKycList(data);
         setTotalPages(pagination.last_page || 1);
         setTotalKycs(pagination.total || data.length);
         setCurrentFrom(pagination.from || (data.length > 0 ? 1 : null));
         setCurrentTo(pagination.to || data.length);
       } catch (error) {
-        console.log('Error fetching KYC requests:', error)
-        toast.error('Error occurred while fetching KYC data')
-      }finally{
-        setLoading(false)
+        console.log('Error fetching KYC requests:', error);
+        toast.error('Error occurred while fetching KYC data');
+      } finally {
+        setLoading(false);
       }
-    }
-    getKycRequests()
-  },[currentPage, refresh])
+    };
+    getKycRequests();
+  }, [currentPage, refresh]);
 
   return (
     <div className="p-6 bg-white rounded-lg ">
       <div className="flex justify-between items-center">
         <div className="mb-4 flex items-center gap-3 w-full max-w-[22.2vw] border border-gray-100 py-3 px-5 rounded-lg">
-            <Image src={'/umanage/search.svg'} alt="" width={20} height={20} />
-            <input
+          <Image src={'/umanage/search.svg'} alt="" width={20} height={20} />
+          <input
             type="text"
             placeholder="Search by user ID, email address"
             value={searchTerm}
             onChange={handleSearchChange}
             className="w-full border-none outline-none text-gray-400 placeholder:text-gray-200"
-            />
+          />
         </div>
         <div className="flex item-center gap-4">
-            <Image src={'/umanage/filter.svg'} alt="" className="cursor-pointer " width={40} height={40} />
-            <Image src={'/umanage/Exportcsv.svg'} alt="" width={40} height={40} />
+          <Image
+            src={'/umanage/filter.svg'}
+            alt=""
+            className="cursor-pointer "
+            width={40}
+            height={40}
+          />
+          <Image src={'/umanage/Exportcsv.svg'} alt="" width={40} height={40} />
         </div>
       </div>
       <table className="w-full border-collapse border border-gray-100 rounded-lg">
@@ -172,44 +183,70 @@ const KycTable = () => {
           </tr>
         </thead>
         <tbody>
-          { loading ? (
+          {loading ? (
             <>
-              {[...Array(5)].map((_, index) => ( // Generate 5 skeleton rows
-                <tr key={index} className="animate-pulse border-gray-100">
-                  <td colSpan={10} className="p-3">
-                    <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
-                  </td>
-                </tr>
-              ))}
-            </>) : Array.isArray(filteredKycs) && filteredKycs.map((kyc) => (
-            <tr key={kyc.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
-              <td className="p-3">
-                <input
-                  type="checkbox"
-                  checked={selectedUsers.includes(kyc.id)}
-                  onChange={() => toggleSelectUser(kyc.id)}
-                />
-              </td>
-              <td className="p-3 capitalize">{kyc.user.name || "N/A"}</td>
-              <td className="p-3">{kyc.user.email || "N/A"}</td>
-              <td className="p-3 capitalize">{kyc.id_type || "N/A"}</td>
-              <td className="p-3 ">{kyc.id_number || "N/A"}</td>
-              <td className="p-3 ">
-                <Link href={kyc.document_path ? kyc.document_path  : ''}  target={kyc.document_path && '_blank'} >
-                  {kyc.document_path ? 'Click here to view' : 'N/A'}
-                </Link>
-              </td>
-              <td className="p-3 ">{kyc.country}</td>
-              <td className="p-3 capitalize">{new Date(kyc.created_at).toLocaleDateString()}</td>
-              <td className={`p-3 capitalize ${kyc.status == 'verified' ? "text-green-500" : "text-red-500"}`}>{kyc.status}</td>
-              <td className="p-3 text-blue-500"><KycDropDown toggleRefresh={toggleRefresh} kycId={kyc.id}/></td>
-            </tr>
-          ))}
-
+              {[...Array(5)].map(
+                (
+                  _,
+                  index // Generate 5 skeleton rows
+                ) => (
+                  <tr key={index} className="animate-pulse border-gray-100">
+                    <td colSpan={10} className="p-3">
+                      <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
+                    </td>
+                  </tr>
+                )
+              )}
+            </>
+          ) : (
+            Array.isArray(filteredKycs) &&
+            filteredKycs.map((kyc) => (
+              <tr
+                key={kyc.id}
+                className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400"
+              >
+                <td className="p-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.includes(kyc.id)}
+                    onChange={() => toggleSelectUser(kyc.id)}
+                  />
+                </td>
+                <td className="p-3 capitalize">{kyc.user.name || 'N/A'}</td>
+                <td className="p-3">{kyc.user.email || 'N/A'}</td>
+                <td className="p-3 capitalize">{kyc.id_type || 'N/A'}</td>
+                <td className="p-3 ">{kyc.id_number || 'N/A'}</td>
+                <td className="p-3 ">
+                  <Link
+                    href={kyc.document_path ? kyc.document_path : ''}
+                    target={kyc.document_path && '_blank'}
+                  >
+                    {kyc.document_path ? 'Click here to view' : 'N/A'}
+                  </Link>
+                </td>
+                <td className="p-3 ">{kyc.country}</td>
+                <td className="p-3 capitalize">
+                  {new Date(kyc.created_at).toLocaleDateString()}
+                </td>
+                <td
+                  className={`p-3 capitalize ${
+                    kyc.status == 'verified' ? 'text-green-500' : 'text-red-500'
+                  }`}
+                >
+                  {kyc.status}
+                </td>
+                <td className="p-3 text-blue-500">
+                  <KycDropDown toggleRefresh={toggleRefresh} kycId={kyc.id} />
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
       <div className="flex justify-between items-center mt-4">
-        <p className="text-sm text-gray-600">{currentFrom}-{currentTo} of {totalKycs} KYC requests</p>
+        <p className="text-sm text-gray-600">
+          {currentFrom}-{currentTo} of {totalKycs} KYC requests
+        </p>
         <div className="flex space-x-2">
           {[...Array(totalPages)].map((_, index) => {
             const page = index + 1;
@@ -231,20 +268,28 @@ const KycTable = () => {
           })}
         </div>
         <div className="flex items-center gap-7">
-            <button
-              onClick={() => paginate(currentPage - 1)}
-              disabled={loading || currentPage === 1}
-              className={`text-sm text-gray-600 hover:text-gray-800 ${loading || currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-                Previous
-            </button>
-            <button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={loading || currentPage === totalPages}
-              className={`text-sm text-gray-600 hover:text-gray-800 ${loading || currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-                Next
-            </button>
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={loading || currentPage === 1}
+            className={`text-sm text-gray-600 hover:text-gray-800 ${
+              loading || currentPage === 1
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
+            }`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={loading || currentPage === totalPages}
+            className={`text-sm text-gray-600 hover:text-gray-800 ${
+              loading || currentPage === totalPages
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
+            }`}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>
