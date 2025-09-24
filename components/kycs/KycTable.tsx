@@ -32,10 +32,16 @@ const KycTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [kycList, setKycList] = useState<kycProps[]>([])
-  const kycsPerPage = 10;
+  const [loading, setLoading] = useState(false)
+  const [refresh, setRefresh] = useState(false)
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalKycs, setTotalKycs] = useState(0);
+  const [currentFrom, setCurrentFrom] = useState(1);
+  const [currentTo, setCurrentTo] = useState(50);
+  const kycsPerPage = 50;
 
 
-  const filteredKycs = kycList.filter((kycs) => {
+  const filteredKycs = Array.isArray(kycList) ? kycList.filter((kycs) => {
     const lowerSearch = searchTerm.toLowerCase();
     return (
       kycs.status?.toLowerCase().includes(lowerSearch) ||
@@ -43,13 +49,13 @@ const KycTable = () => {
       kycs.user.email?.toLowerCase().includes(lowerSearch) ||
       kycs.user.name?.toLowerCase().includes(lowerSearch)
     );
-  });
+  }) : [];
 
   const toggleSelectAll = () => {
     if (selectAll) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(filteredKycs.map((kyc) => kyc.id));
+      setSelectedUsers(Array.isArray(kycList) ? kycList.map((kyc) => kyc.id) : []);
     }
     setSelectAll(!selectAll);
   };
@@ -61,33 +67,70 @@ const KycTable = () => {
         : [...prevSelected, id]
     );
   };
-  const indexOfLastKyc = currentPage * kycsPerPage;
-  const indexOfFirstKyc = indexOfLastKyc - kycsPerPage;
-  const currentKycs = filteredKycs.slice(indexOfFirstKyc, indexOfLastKyc);
 
-  const paginate = (pageNumber : number) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber : number) => {
+    setCurrentPage(pageNumber);
+    setSearchTerm(''); // reset search when changing page
+    setSelectedUsers([]); // reset selections
+    setSelectAll(false);
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // reset to first page when searching
+    setSelectedUsers([]); // reset selections
+    setSelectAll(false);
   };
 
-  const [loading, setLoading] = useState(false)
-  const [refresh, setRefresh] = useState(false)
   const toggleRefresh = ()=> setRefresh(!refresh)
   useEffect(()=>{
     const getKycRequests = async()=>{
       try {
         setLoading(true)
-        const res = await axiosGet('/admin/kyc-requests',true)
-        setKycList(res.kyc_requests)
+        const res = await axiosGet(`/admin/kyc-requests?page=${currentPage}`,true)
+        console.log('KYC requests API response:', res)
+        
+        // Handle different response structures
+        let data: kycProps[] = [];
+        let pagination: any = {};
+        
+        if (res.kyc_requests) {
+          // Standard response structure with kyc_requests key
+          data = res.kyc_requests.data || [];
+          pagination = res.kyc_requests;
+        } else if (res.data && Array.isArray(res.data)) {
+          // Direct array response
+          data = res.data;
+          pagination = res;
+        } else if (Array.isArray(res)) {
+          // Direct array
+          data = res;
+          pagination = {
+            last_page: 1,
+            total: res.length,
+            from: 1,
+            to: res.length,
+          };
+        } else {
+          // Fallback
+          data = [];
+          pagination = { last_page: 1, total: 0, from: null, to: null };
+        }
+        
+        setKycList(data);
+        setTotalPages(pagination.last_page || 1);
+        setTotalKycs(pagination.total || data.length);
+        setCurrentFrom(pagination.from || (data.length > 0 ? 1 : null));
+        setCurrentTo(pagination.to || data.length);
       } catch (error) {
-        toast.error('Error occured while fetching users data')
+        console.log('Error fetching KYC requests:', error)
+        toast.error('Error occurred while fetching KYC data')
       }finally{
         setLoading(false)
       }
     }
     getKycRequests()
-  },[refresh])
+  },[currentPage, refresh])
 
   return (
     <div className="p-6 bg-white rounded-lg ">
@@ -133,12 +176,12 @@ const KycTable = () => {
             <>
               {[...Array(5)].map((_, index) => ( // Generate 5 skeleton rows
                 <tr key={index} className="animate-pulse border-gray-100">
-                  <td colSpan={9} className="p-3">
+                  <td colSpan={10} className="p-3">
                     <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
                   </td>
                 </tr>
               ))}
-            </>) : currentKycs.map((kyc) => (
+            </>) : Array.isArray(filteredKycs) && filteredKycs.map((kyc) => (
             <tr key={kyc.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
               <td className="p-3">
                 <input
@@ -166,23 +209,40 @@ const KycTable = () => {
         </tbody>
       </table>
       <div className="flex justify-between items-center mt-4">
-        <p className="text-sm text-gray-600">1-5 of {filteredKycs.length} users</p>
+        <p className="text-sm text-gray-600">{currentFrom}-{currentTo} of {totalKycs} KYC requests</p>
         <div className="flex space-x-2">
-          {[...Array(Math.ceil(filteredKycs.length / kycsPerPage)).keys()].map((number) => (
-            <button
-              key={number + 1}
-              onClick={() => paginate(number + 1)}
-              className={`px-3 py-1 border rounded-md cursor-pointer ${currentPage === number + 1 ? "bg-blue-500 text-white" : "bg-white text-gray-700"}`}
-            >
-              {number + 1}
-            </button>
-          ))}
+          {[...Array(totalPages)].map((_, index) => {
+            const page = index + 1;
+            const isActive = page === currentPage;
+            return (
+              <button
+                key={page}
+                onClick={() => paginate(page)}
+                disabled={loading}
+                className={`px-3 py-1 border rounded-md cursor-pointer ${
+                  isActive
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {page}
+              </button>
+            );
+          })}
         </div>
         <div className="flex items-center gap-7">
-            <button>
+            <button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={loading || currentPage === 1}
+              className={`text-sm text-gray-600 hover:text-gray-800 ${loading || currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
                 Previous
             </button>
-            <button>
+            <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={loading || currentPage === totalPages}
+              className={`text-sm text-gray-600 hover:text-gray-800 ${loading || currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
                 Next
             </button>
         </div>

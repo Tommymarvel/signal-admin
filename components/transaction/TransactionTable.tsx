@@ -53,19 +53,19 @@ const TransactionTable = () => {
       try {
         setLoading(true);
         const res = await axiosGet(
-          `/admin/withdraw-requests?page=${currentPage}`,
+          `/admin/transactions?page=${currentPage}`,
           true
         );
-        console.log('All withdrawals API response:', res);
+        console.log('All transactions API response:', res);
 
         // Handle different response structures
         let data: trrxProps[] = [];
         let pagination: any = {};
 
-        if (res.withdrawals) {
-          // Standard response structure
-          data = res.withdrawals.data || [];
-          pagination = res.withdrawals;
+        if (res.transactions) {
+          // Standard response structure with transactions key
+          data = res.transactions.data || [];
+          pagination = res.transactions;
         } else if (res.data && Array.isArray(res.data)) {
           // Direct array response
           data = res.data;
@@ -91,7 +91,7 @@ const TransactionTable = () => {
         setCurrentFrom(pagination.from || (data.length > 0 ? 1 : null));
         setCurrentTo(pagination.to || data.length);
       } catch (error) {
-        console.log('Error fetching all withdrawals:', error);
+        console.log('Error fetching all transactions:', error);
         toast.error('Unable to fetch Transaction data');
       } finally {
         setLoading(false);
@@ -222,7 +222,14 @@ const TransactionTable = () => {
                     {trx.status}
                   </td>
                   <td className="p-3">
-                    <TrxDropDown toggleRefresh={toggleRefresh} trxId={trx.id} />
+                    {trx.type === 'withdraw' && trx.status === 'pending' ? (
+                      <TrxDropDown
+                        toggleRefresh={toggleRefresh}
+                        trxId={trx.id}
+                      />
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
                   </td>
                 </tr>
               ))
@@ -232,7 +239,7 @@ const TransactionTable = () => {
         {Array.isArray(trxs) && trxs.length > 0 ? (
           <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-600">
-              {currentFrom}-{currentTo} of {totalTrxs} withdrawals
+              {currentFrom}-{currentTo} of {totalTrxs} transactions
             </p>
             <div className="flex space-x-2">
               {[...Array(totalPages)].map((_, index) => {
@@ -280,7 +287,7 @@ const TransactionTable = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center my-4">No Withdrawal Requests found</div>
+          <div className="text-center my-4">No Transactions found</div>
         )}
       </main>
     </div>
