@@ -13,6 +13,10 @@ const page = () => {
             <Link href={'/transactions/all'} className='px-2 py-2 text-gray-100 font-man-rope bg-[#1B1F3B] rounded-lg font-semibold text-lg'>
                 All Transactions
             </Link>
+
+            <Link href={'/transactions/pending'} className='text-[#5E5E5E] font-man-rope font-semibold text-lg'>
+                Pending Withdrawal
+            </Link>
         </header>
         <TransactionTable />
     </div>

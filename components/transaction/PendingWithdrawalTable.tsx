@@ -21,7 +21,7 @@ interface trrxProps {
   updated_at: string;
 }
 
-const TransactionTable = () => {
+const PendingWithdrawalTable = () => {
   const [selectedTrx, setSelectedTrx] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,16 +53,20 @@ const TransactionTable = () => {
       try {
         setLoading(true);
         const res = await axiosGet(
-          `/admin/withdraw-requests?page=${currentPage}`,
+          `/admin/withdraw-requests?status=pending&page=${currentPage}`,
           true
         );
-        console.log('All withdrawals API response:', res);
+        console.log('Pending withdrawals API response:', res);
 
         // Handle different response structures
         let data: trrxProps[] = [];
         let pagination: any = {};
 
-        if (res.withdrawals) {
+        if (res.pending_withdrawals) {
+          // Empty response structure
+          data = res.pending_withdrawals.data || [];
+          pagination = res.pending_withdrawals;
+        } else if (res.withdrawals) {
           // Standard response structure
           data = res.withdrawals.data || [];
           pagination = res.withdrawals;
@@ -91,8 +95,8 @@ const TransactionTable = () => {
         setCurrentFrom(pagination.from || (data.length > 0 ? 1 : null));
         setCurrentTo(pagination.to || data.length);
       } catch (error) {
-        console.log('Error fetching all withdrawals:', error);
-        toast.error('Unable to fetch Transaction data');
+        console.log('Error fetching pending withdrawals:', error);
+        toast.error('Unable to fetch Pending Withdrawals data');
       } finally {
         setLoading(false);
       }
@@ -107,6 +111,7 @@ const TransactionTable = () => {
         : [...prevSelected, id]
     );
   };
+
   const filteredTrx = Array.isArray(trxs)
     ? trxs.filter((trx) => {
         const lowerSearch = searchTerm.toLowerCase();
@@ -232,7 +237,7 @@ const TransactionTable = () => {
         {Array.isArray(trxs) && trxs.length > 0 ? (
           <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-600">
-              {currentFrom}-{currentTo} of {totalTrxs} withdrawals
+              {currentFrom}-{currentTo} of {totalTrxs} pending withdrawals
             </p>
             <div className="flex space-x-2">
               {[...Array(totalPages)].map((_, index) => {
@@ -280,11 +285,11 @@ const TransactionTable = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center my-4">No Withdrawal Requests found</div>
+          <div className="text-center my-4">No Pending Withdrawals found</div>
         )}
       </main>
     </div>
   );
 };
 
-export default TransactionTable;
+export default PendingWithdrawalTable;

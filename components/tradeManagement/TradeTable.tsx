@@ -8,68 +8,73 @@ import TradeDropDown from './TradeDropDown';
 
 export interface Trade {
   id: number;
-  tid: string;
+  user_id: number;
+  user_name: string;
+  user_email: string;
+  uid: string;
+  bin: null | string;
   symbol: string;
   side: 'PUT' | 'CALL';
+  type: string;
   price: string;
+  quantity: string;
+  status: 'FILLED' | 'CANCELED' | 'NEW';
+  pnl: null | string;
+  open_price: string | null;
+  rate_of_return: string | null;
+  settlement_price: string | null;
+  order_id: string;
+  created_at: string;
   followers: number;
-  totalValue: number;
-  status: 'FILLED' | 'CANCELLED' | 'PARTIALLY_FILLED' | 'NEW';
-  time_period : string;
-  trade_period : string;
-  open_price : string | number;
-  settlement_price : string | number;
-  open_position_time : string;
-  rate_of_return : number;
 }
-
-
 
 export default function TradesTable() {
   // Table state
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalTrades, setTotalTrades] = useState(0);
+  const [currentFrom, setCurrentFrom] = useState(1);
+  const [currentTo, setCurrentTo] = useState(50);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [refresh, setRefresh] = useState(false)
+  const [refresh, setRefresh] = useState(false);
 
-  const tradesPerPage = 10;
+  const tradesPerPage = 50;
 
-  useEffect(()=>{
-    const getTrades = async()=>{
+  useEffect(() => {
+    const getTrades = async () => {
       try {
-        setLoading(true)
-        const res = await axiosGet(`/admin/trades`,true)
-        setTrades(res.trades)
+        setLoading(true);
+        const res = await axiosGet(`/admin/trades?page=${currentPage}`, true);
+        setTrades(res.trades.data);
+        setTotalPages(res.trades.last_page);
+        setTotalTrades(res.trades.total);
+        setCurrentFrom(res.trades.from);
+        setCurrentTo(res.trades.to);
       } catch (error) {
-        console.log(error)
-        toast.error('Error occurred while fetching trade data')
-      }finally{
-        setLoading(false)
+        console.log(error);
+        toast.error('Error occurred while fetching trade data');
+      } finally {
+        setLoading(false);
       }
-    }
-    getTrades()
-  },[refresh])
+    };
+    getTrades();
+  }, [currentPage, refresh]);
 
   // Filter trades by search
   const filteredTrades = trades.filter((trade) => {
     const lowerSearch = searchTerm.toLowerCase();
     return (
-      trade.tid?.toLowerCase().includes(lowerSearch) ||
+      trade.order_id?.toLowerCase().includes(lowerSearch) ||
       String(trade.id)?.toLowerCase().includes(lowerSearch) ||
       trade.symbol?.toLowerCase().includes(lowerSearch)
     );
   });
 
   // Pagination calculations
-  const indexOfLastTrade = currentPage * tradesPerPage;
-  const indexOfFirstTrade = indexOfLastTrade - tradesPerPage;
-  const currentTrades = filteredTrades.slice(
-    indexOfFirstTrade,
-    indexOfLastTrade
-  );
-  const totalPages = Math.ceil(filteredTrades.length / tradesPerPage);
+  const currentTrades = filteredTrades;
 
   // Handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,9 +85,10 @@ export default function TradesTable() {
   const paginate = (pageNumber: number) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
+    setSearchTerm(''); // reset search when changing page
   };
 
-  const toggleRefresh = ()=> setRefresh(!refresh)
+  const toggleRefresh = () => setRefresh(!refresh);
 
   return (
     <div className="p-6 bg-white rounded-lg font-inter">
@@ -124,52 +130,77 @@ export default function TradesTable() {
             <th className="p-3 text-gray-500">Price ($)</th>
             <th className="p-3 text-gray-500">Followed</th>
             <th className="p-3 text-gray-500">Total Value ($)</th>
+            <th className="p-3 text-gray-500">Date</th>
             <th className="p-3 text-gray-500">Status</th>
             <th className="p-3"></th>
           </tr>
         </thead>
         <tbody>
-          { loading ? (
+          {loading ? (
             <>
-              {[...Array(5)].map((_, index) => ( // Generate 5 skeleton rows
-                <tr key={index} className="animate-pulse border-gray-100">
-                  <td colSpan={8} className="p-3">
-                    <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
+              {[...Array(5)].map(
+                (
+                  _,
+                  index // Generate 5 skeleton rows
+                ) => (
+                  <tr key={index} className="animate-pulse border-gray-100">
+                    <td colSpan={9} className="p-3">
+                      <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
+                    </td>
+                  </tr>
+                )
+              )}
+            </>
+          ) : (
+            currentTrades.map((trade) => {
+              // Color-coding statuses
+              let statusColor = 'text-gray-500';
+              if (trade.status == 'NEW') statusColor = 'text-green-500';
+              else if (trade.status == 'CANCELED') statusColor = 'text-red-500';
+              else if (trade.status == 'FILLED') statusColor = 'text-gray-700';
+
+              return (
+                <tr
+                  key={trade.id}
+                  className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400"
+                >
+                  <td className="p-3">{trade.order_id || trade.id || 'N/A'}</td>
+                  <td className="p-3">{trade.symbol}</td>
+                  <td className="p-3">{trade.side}</td>
+                  <td className="p-3">
+                    {trade?.price
+                      ? parseFloat(trade.price).toLocaleString()
+                      : 'N/A'}
+                  </td>
+                  <td className="p-3">{trade?.followers || 'N/A'}</td>
+                  <td className="p-3">
+                    {trade?.price
+                      ? parseFloat(trade.price).toLocaleString()
+                      : 'N/A'}
+                  </td>
+                  <td className="p-3">
+                    {trade.created_at
+                      ? new Date(trade.created_at).toLocaleDateString()
+                      : 'N/A'}
+                  </td>
+                  <td className={`p-3 font-medium capitalize ${statusColor}`}>
+                    {trade.status}
+                  </td>
+                  <td className="p-3">
+                    <TradeDropDown
+                      toggleRefresh={toggleRefresh}
+                      tradeData={trade}
+                      tradeId={trade.id}
+                    />
                   </td>
                 </tr>
-              ))}
-            </>) :
-          currentTrades.map((trade) => {
-            // Color-coding statuses
-            let statusColor = 'text-gray-500';
-            if (trade.status == 'NEW') statusColor = 'text-green-500';
-            else if (trade.status == 'CANCELLED') statusColor = 'text-red-500';
-            else if (trade.status == 'FILLED')
-              statusColor = 'text-gray-700';
-            else if (trade.status == 'PARTIALLY_FILLED')
-              statusColor = 'text-yellow-500';
-
-            return (
-              <tr key={trade.id} className="border-t border-gray-100 text-[0.85vw] font-semibold font-man-rope text-gray-400">
-                <td className="p-3">{trade.tid || trade.id || "N/A"}</td>
-                <td className="p-3">{trade.symbol}</td>
-                <td className="p-3">{trade.side}</td>
-                <td className="p-3">{trade?.price?.toLocaleString() || "N/A"}</td>
-                <td className="p-3">{trade?.followers || "N/A"}</td>
-                <td className="p-3">{trade?.totalValue?.toLocaleString() || "N/A"}</td>
-                <td className={`p-3 font-medium capitalize ${statusColor}`}>
-                  {trade.status}
-                </td>
-                <td className="p-3">
-                  <TradeDropDown toggleRefresh={toggleRefresh} tradeData={trade} tradeId={trade.id} />
-                </td>
-              </tr>
-            );
-          })}
+              );
+            })
+          )}
           {/* If no trades found */}
           {currentTrades.length === 0 && (
             <tr>
-              <td colSpan={8} className="p-3 text-center text-gray-400">
+              <td colSpan={9} className="p-3 text-center text-gray-400">
                 No trades found.
               </td>
             </tr>
@@ -181,9 +212,7 @@ export default function TradesTable() {
       <div className="flex justify-between items-center mt-4">
         {/* Showing X-Y of Z Trades */}
         <p className="text-sm text-gray-600">
-          {indexOfFirstTrade + 1}-
-          {Math.min(indexOfLastTrade, filteredTrades.length)} of{' '}
-          {filteredTrades.length} Trades
+          {currentFrom}-{currentTo} of {totalTrades} Trades
         </p>
 
         {/* Page Number Buttons */}
@@ -195,11 +224,12 @@ export default function TradesTable() {
               <button
                 key={page}
                 onClick={() => paginate(page)}
+                disabled={loading}
                 className={`px-3 py-1 border rounded-md ${
                   isActive
                     ? 'bg-blue-500 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
+                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {page}
               </button>
@@ -211,20 +241,30 @@ export default function TradesTable() {
         <div className="flex items-center gap-7">
           <button
             onClick={() => paginate(currentPage - 1)}
-            className="text-sm text-gray-600 hover:text-gray-800"
+            disabled={loading || currentPage === 1}
+            className={`text-sm text-gray-600 hover:text-gray-800 ${
+              loading || currentPage === 1
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
+            }`}
           >
             Previous
           </button>
           <button
             onClick={() => paginate(currentPage + 1)}
-            className="text-sm text-gray-600 hover:text-gray-800"
+            disabled={loading || currentPage === totalPages}
+            className={`text-sm text-gray-600 hover:text-gray-800 ${
+              loading || currentPage === totalPages
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
+            }`}
           >
             Next
           </button>
         </div>
       </div>
       <NewTradeModal
-       toggleRefresh={toggleRefresh}
+        toggleRefresh={toggleRefresh}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
