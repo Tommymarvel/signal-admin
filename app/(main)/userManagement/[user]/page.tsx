@@ -1,6 +1,7 @@
 'use client';
 import { Button, PrimaryLink } from '@/components/shared/NavLink';
 import UserTable from '@/components/usermanagement/UserTable';
+import FundUserModal from '@/components/usermanagement/FundUserModal';
 import { axiosGet, axiosPost } from '@/utils/api';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -11,6 +12,8 @@ const page = () => {
   const { user } = useParams();
   const [userInfo, setUserInfo] = useState<userDetailProps | any>(null);
   const [loading, setLoading] = useState(true);
+  const [isFundModalOpen, setIsFundModalOpen] = useState(false);
+  
   useEffect(() => {
     const getUserInfo = async () => {
       setLoading(true);
@@ -270,14 +273,27 @@ const page = () => {
             )}
           </tbody>
         </table>
-        <div className="flex items-center justify-end py-6">
+        <div className="flex items-center justify-end gap-4 py-6">
+          <Button
+            onClick={() => setIsFundModalOpen(true)}
+            text="Fund User"
+            className="max-w-[180px] bg-green-600 hover:bg-green-700"
+          />
           <Button
             onClick={() => handleSuspendUser(userInfo.id)}
             text="Suspend User"
-            className="max-w-[180px]"
+            className="max-w-[180px] bg-red-600 hover:bg-red-700"
           />
         </div>
       </main>
+
+      {/* Fund User Modal */}
+      <FundUserModal
+        isOpen={isFundModalOpen}
+        onClose={() => setIsFundModalOpen(false)}
+        userId={userInfo?.id}
+        userName={userInfo?.name || userInfo?.email || 'User'}
+      />
     </div>
   );
 };

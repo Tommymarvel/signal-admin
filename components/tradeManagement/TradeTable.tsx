@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import NewTradeModal from './modal/NewTradeModal';
+import TradeFollowersModal from './TradeFollowersModal';
 import { axiosGet } from '@/utils/api';
 import { toast } from 'react-toastify';
 import TradeDropDown from './TradeDropDown';
@@ -40,6 +41,8 @@ export default function TradesTable() {
   const [currentTo, setCurrentTo] = useState(50);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
+  const [selectedTradeId, setSelectedTradeId] = useState<number | null>(null);
 
   const tradesPerPage = 50;
 
@@ -89,6 +92,11 @@ export default function TradesTable() {
   };
 
   const toggleRefresh = () => setRefresh(!refresh);
+
+  const handleViewParticipants = (tradeId: number) => {
+    setSelectedTradeId(tradeId);
+    setIsFollowersModalOpen(true);
+  };
 
   return (
     <div className="p-6 bg-white rounded-lg font-inter">
@@ -144,7 +152,7 @@ export default function TradesTable() {
                   index // Generate 5 skeleton rows
                 ) => (
                   <tr key={index} className="animate-pulse border-gray-100">
-                    <td colSpan={9} className="p-3">
+                    <td colSpan={10} className="p-3">
                       <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
                     </td>
                   </tr>
@@ -187,6 +195,28 @@ export default function TradesTable() {
                     {trade.status}
                   </td>
                   <td className="p-3">
+                    <button
+                      onClick={() => handleViewParticipants(trade.id)}
+                      className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                      title="View Participants"
+                    >
+                      <svg
+                        className="w-4 h-4 inline mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                        />
+                      </svg>
+                      {trade.followers || 0}
+                    </button>
+                  </td>
+                  <td className="p-3">
                     <TradeDropDown
                       toggleRefresh={toggleRefresh}
                       tradeData={trade}
@@ -200,7 +230,7 @@ export default function TradesTable() {
           {/* If no trades found */}
           {currentTrades.length === 0 && (
             <tr>
-              <td colSpan={9} className="p-3 text-center text-gray-400">
+              <td colSpan={10} className="p-3 text-center text-gray-400">
                 No trades found.
               </td>
             </tr>
@@ -268,6 +298,16 @@ export default function TradesTable() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+      {selectedTradeId && (
+        <TradeFollowersModal
+          isOpen={isFollowersModalOpen}
+          onClose={() => {
+            setIsFollowersModalOpen(false);
+            setSelectedTradeId(null);
+          }}
+          tradeId={selectedTradeId}
+        />
+      )}
     </div>
   );
 }
