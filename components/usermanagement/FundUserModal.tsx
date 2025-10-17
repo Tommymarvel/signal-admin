@@ -20,7 +20,7 @@ export default function FundUserModal({
     currency: "USDT",
     account_type: "exchange",
     amount: "",
-    action: "credit",
+    action: "add",
     balance_type: "both",
     reason: "",
   });
@@ -53,9 +53,9 @@ export default function FundUserModal({
     }
 
     const confirmMessage = `Are you sure you want to ${
-      formData.action === "credit" ? "add" : "deduct"
+      formData.action === "add" ? "add" : "deduct"
     } ${formData.amount} ${formData.currency} ${
-      formData.action === "credit" ? "to" : "from"
+      formData.action === "add" ? "to" : "from"
     } ${userName}'s ${formData.account_type} account?`;
 
     if (!window.confirm(confirmMessage)) {
@@ -80,7 +80,7 @@ export default function FundUserModal({
       
       if (res.data?.success) {
         toast.success(
-          `Successfully ${formData.action === "credit" ? "added" : "deducted"} ${
+          `Successfully ${formData.action === "add" ? "added" : "deducted"} ${
             formData.amount
           } ${formData.currency}`
         );
@@ -90,7 +90,7 @@ export default function FundUserModal({
           currency: "USDT",
           account_type: "exchange",
           amount: "",
-          action: "credit",
+          action: "add",
           balance_type: "both",
           reason: "",
         });
@@ -205,8 +205,8 @@ export default function FundUserModal({
               disabled={loading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="credit">Credit (Add Funds)</option>
-              <option value="debit">Debit (Deduct Funds)</option>
+              <option value="add">Add Funds</option>
+              <option value="deduct">Deduct Funds</option>
             </select>
           </div>
 
