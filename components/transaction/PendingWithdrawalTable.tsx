@@ -4,11 +4,12 @@ import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import TrxDropDown from './TrxDropDown';
+import Link from 'next/link';
 
 interface trrxProps {
   id: number;
   user_id: number;
-  tx_id: string;
+  tx_id: string | null;
   currency: string;
   chain: string;
   amount: string;
@@ -19,6 +20,12 @@ interface trrxProps {
   status: string;
   created_at: string;
   updated_at: string;
+  user?: {
+    id: number;
+    user_identifier: string;
+    name?: string;
+    email?: string;
+  };
 }
 
 const PendingWithdrawalTable = () => {
@@ -153,7 +160,8 @@ const PendingWithdrawalTable = () => {
         />
       </div>
       <main className=" bg-white rounded-lg">
-        <table className="w-full border-collapse border border-gray-100 rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-max border-collapse border border-gray-100 rounded-lg">
           <thead>
             <tr className="bg-white-200 text-left rounded-lg">
               <th className="p-3">
@@ -209,7 +217,19 @@ const PendingWithdrawalTable = () => {
                     />
                   </td>
                   <td className="p-3">{trx?.tx_id || trx?.id}</td>
-                  <td className="p-3">{trx.user_id}</td>
+                  <td className="p-3">
+                    {trx.user?.user_identifier ? (
+                      <Link 
+                        href={`/userManagement/${trx.user.user_identifier}`}
+                        target="_blank"
+                        className="text-blue-500 hover:underline"
+                      >
+                        {trx.user_id}
+                      </Link>
+                    ) : (
+                      <span>{trx.user_id}</span>
+                    )}
+                  </td>
                   <td className="p-3">{trx.type}</td>
                   <td className="p-3">{trx.currency}</td>
                   <td className="p-3">{trx.amount}</td>
@@ -234,6 +254,7 @@ const PendingWithdrawalTable = () => {
             )}
           </tbody>
         </table>
+        </div>
         {Array.isArray(trxs) && trxs.length > 0 ? (
           <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-600">

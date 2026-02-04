@@ -161,7 +161,8 @@ const KycTable = () => {
           <Image src={'/umanage/Exportcsv.svg'} alt="" width={40} height={40} />
         </div>
       </div>
-      <table className="w-full border-collapse border border-gray-100 rounded-lg">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-max border-collapse border border-gray-100 rounded-lg">
         <thead>
           <tr className="bg-white-200 text-left rounded-lg">
             <th className="p-3">
@@ -243,6 +244,7 @@ const KycTable = () => {
           )}
         </tbody>
       </table>
+      </div>
       <div className="flex justify-between items-center mt-4">
         <p className="text-sm text-gray-600">
           {currentFrom}-{currentTo} of {totalKycs} KYC requests
