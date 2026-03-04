@@ -4,19 +4,20 @@ interface userDetailProps {
     name: string | null,
     email: string,
     phone_number: string | null,
+    is_banned?: boolean,
     status :  string
     role: string,
     date_joined: string,
     is_verified: boolean,
     kyc_status: string,
-    referrals_list : [
+    referrals_list : Array<
     {"id": string,
     "user_identifier": string,
     "email": string | null,
     "phone_number": string | null,
     "date_joined": string,
     "is_verified": boolean}
-    ],
+    >,
     id_type: null | string,
     id_number: null | string,
     current_balance: string,

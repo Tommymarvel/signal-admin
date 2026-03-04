@@ -9,13 +9,24 @@ const UserTable = () => {
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [userList, setUserList] = useState<userDetailProps[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [currentFrom, setCurrentFrom] = useState(1);
-  const [currentTo, setCurrentTo] = useState(50);
-  const usersPerPage = 50;
+  const [currentFrom, setCurrentFrom] = useState(0);
+  const [currentTo, setCurrentTo] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 350);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  const currentUsers = userList;
 
   const toggleSelectAll = () => {
     if (selectAll) {
@@ -34,19 +45,9 @@ const UserTable = () => {
     );
   };
 
-  const filteredUsers = userList.filter((users) => {
-    const lowerSearch = searchTerm.toLowerCase();
-    return (
-      users.name?.toLowerCase().includes(lowerSearch) ||
-      String(users.id)?.toLowerCase().includes(lowerSearch) ||
-      users.email?.toLowerCase().includes(lowerSearch)
-    );
-  });
-  const currentUsers = filteredUsers;
-
   const paginate = (pageNumber: number) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
-    setSearchTerm(''); // reset search when changing page
     setSelectedUsers([]); // reset selections
     setSelectAll(false);
   };
@@ -57,17 +58,24 @@ const UserTable = () => {
     setSelectAll(false);
   };
 
-  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const getUsers = async () => {
       try {
         setLoading(true);
-        const res = await axiosGet(`/admin/users?page=${currentPage}`, true);
+        const params = new URLSearchParams({
+          page: String(currentPage),
+        });
+
+        if (debouncedSearch) {
+          params.set('search', debouncedSearch);
+        }
+
+        const res = await axiosGet(`/admin/users?${params.toString()}`, true);
         setUserList(res.users.data);
         setTotalPages(res.users.last_page);
         setTotalUsers(res.users.total);
-        setCurrentFrom(res.users.from);
-        setCurrentTo(res.users.to);
+        setCurrentFrom(res.users.from ?? 0);
+        setCurrentTo(res.users.to ?? 0);
       } catch (error) {
         toast.error('Error occured while fetching users data');
       } finally {
@@ -75,7 +83,7 @@ const UserTable = () => {
       }
     };
     getUsers();
-  }, [currentPage]);
+  }, [currentPage, debouncedSearch]);
 
   return (
     <div className="p-6 bg-white rounded-lg ">
@@ -84,7 +92,7 @@ const UserTable = () => {
           <Image src={'/umanage/search.svg'} alt="" width={20} height={20} />
           <input
             type="text"
-            placeholder="Search by user ID, email address"
+            placeholder="Search by any user field"
             value={searchTerm}
             onChange={handleSearchChange}
             className="w-full border-none outline-none text-gray-400 placeholder:text-gray-200"
@@ -160,10 +168,14 @@ const UserTable = () => {
                 <td className="p-3 text-blue-500">{user.kyc_status}</td>
                 <td
                   className={`p-3 ${
-                    user.status === 'Active' ? 'text-green-500' : 'text-red-500'
+                    user?.is_banned || user.status === 'Inactive'
+                      ? 'text-red-500'
+                      : 'text-green-500'
                   }`}
                 >
-                  {user.status === 'Inactive' ? 'Inactive' : 'Active'}
+                  {user?.is_banned || user.status === 'Inactive'
+                    ? 'Inactive'
+                    : 'Active'}
                 </td>
                 <td className="p-3 text-blue-500">
                   <UserDropDown userId={user.uid} />

@@ -1,6 +1,5 @@
 'use client';
-import { Button, PrimaryLink } from '@/components/shared/NavLink';
-import UserTable from '@/components/usermanagement/UserTable';
+import { Button } from '@/components/shared/NavLink';
 import FundUserModal from '@/components/usermanagement/FundUserModal';
 import { axiosGet, axiosPost } from '@/utils/api';
 import Link from 'next/link';
@@ -13,6 +12,9 @@ const page = () => {
   const [userInfo, setUserInfo] = useState<userDetailProps | any>(null);
   const [loading, setLoading] = useState(true);
   const [isFundModalOpen, setIsFundModalOpen] = useState(false);
+  const isSuspended = Boolean(
+    userInfo?.is_banned || userInfo?.status === 'Inactive'
+  );
   
   useEffect(() => {
     const getUserInfo = async () => {
@@ -44,20 +46,38 @@ const page = () => {
     getUserInfo();
   }, [user]);
 
-  const handleSuspendUser = async (user_id: string | number | undefined) => {
+  const handleUserSuspensionToggle = async (
+    user_id: string | number | undefined
+  ) => {
+    if (!user_id) {
+      toast.error('Invalid user ID');
+      return;
+    }
+
+    const shouldUnsuspend = isSuspended;
+    const actionLabel = shouldUnsuspend ? 'unsuspend' : 'suspend';
+    const endpoint = shouldUnsuspend ? '/admin/user/unban' : '/admin/user/ban';
+
     try {
-      const confirm = window.confirm(
-        'Are you sure you want to suspend this user'
-      );
+      const confirm = window.confirm(`Are you sure you want to ${actionLabel} this user?`);
 
       if (confirm) {
-        await axiosPost('/admin/user/ban', { user_id }, true);
-        toast.success('User Deleted Successfully');
+        await axiosPost(endpoint, { user_id }, true);
+        setUserInfo((prev: userDetailProps | null) =>
+          prev
+            ? {
+                ...prev,
+                is_banned: !shouldUnsuspend,
+                status: shouldUnsuspend ? 'Active' : 'Inactive',
+              }
+            : prev
+        );
+        toast.success(`User ${actionLabel}ed successfully`);
       }
       return;
     } catch (error) {
       console.log(error);
-      toast.error('An error occurred while deleting admin');
+      toast.error(`An error occurred while trying to ${actionLabel} this user`);
     }
   };
   const explanationHeaderStyles = 'text-black text-[1.2vw] font-semibold';
@@ -129,12 +149,10 @@ const page = () => {
               <h2 className={`${explanationHeaderStyles}`}>Account Status</h2>
               <p
                 className={`${explanationBodyStyles} ${
-                  userInfo.status == 'Inacitve'
-                    ? 'text-red-400'
-                    : 'text-green-400'
+                  isSuspended ? 'text-red-400' : 'text-green-400'
                 } `}
               >
-                {userInfo.status == 'Inacitve' ? 'Inactive' : 'Active'}
+                {isSuspended ? 'Inactive' : 'Active'}
               </p>
             </div>
             <div>
@@ -280,9 +298,13 @@ const page = () => {
             className="max-w-[180px] bg-green-600 hover:bg-green-700"
           />
           <Button
-            onClick={() => handleSuspendUser(userInfo.id)}
-            text="Suspend User"
-            className="max-w-[180px] bg-red-600 hover:bg-red-700"
+            onClick={() => handleUserSuspensionToggle(userInfo.id)}
+            text={isSuspended ? 'Unsuspend User' : 'Suspend User'}
+            className={`max-w-[180px] ${
+              isSuspended
+                ? 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-red-600 hover:bg-red-700'
+            }`}
           />
         </div>
       </main>
